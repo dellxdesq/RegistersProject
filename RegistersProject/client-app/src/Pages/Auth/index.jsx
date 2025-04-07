@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import styles from "./styles";
 
 export default function LoginPage() {
     const navigate = useNavigate();
@@ -8,16 +9,15 @@ export default function LoginPage() {
 
     const handleLogin = (e) => {
         e.preventDefault();
-
         navigate("/");
     };
 
     return (
-        <div className="login-page">
-            <div className="login-container">
-                <h1 className="login-title">Вход</h1>
+        <div style={styles.loginPage}>
+            <div style={styles.loginContainer}>
+                <h1 style={styles.loginTitle}>Добро пожаловать</h1>
                 <form onSubmit={handleLogin}>
-                    <div className="form-group">
+                    <div style={styles.formGroup}>
                         <label htmlFor="email">Почта</label>
                         <input
                             id="email"
@@ -26,9 +26,10 @@ export default function LoginPage() {
                             onChange={(e) => setEmail(e.target.value)}
                             required
                             placeholder="you@example.com"
+                            style={styles.input}
                         />
                     </div>
-                    <div className="form-group">
+                    <div style={styles.formGroup}>
                         <label htmlFor="password">Пароль</label>
                         <input
                             id="password"
@@ -37,14 +38,17 @@ export default function LoginPage() {
                             onChange={(e) => setPassword(e.target.value)}
                             required
                             placeholder="••••••••"
+                            style={styles.input}
                         />
                     </div>
-                    <button type="submit" className="login-button">
+                    <button type="submit" style={styles.loginButton}>
                         Вход
                     </button>
                 </form>
-                <div className="register-link">
-                    <button onClick={() => navigate("/register")}>Регистрация</button>
+                <div style={styles.registerLink}>
+                    <button onClick={() => navigate("/register")} style={{ background: "none", border: "none", color: "#7f00ff", cursor: "pointer" }}>
+                        Регистрация
+                    </button>
                 </div>
             </div>
         </div>
