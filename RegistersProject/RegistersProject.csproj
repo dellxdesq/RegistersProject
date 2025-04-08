@@ -12,7 +12,6 @@
 
     <ItemGroup>
       <Folder Include="client-app\src\Pages\Main\" />
-      <Folder Include="client-app\src\Pages\Register\" />
     </ItemGroup>
 
 </Project>
