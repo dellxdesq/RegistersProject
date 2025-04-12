@@ -1,6 +1,7 @@
-@backend_HostAddress = http://localhost:5210
+@backend_HttpHostAddress = http://localhost:8080
+@backend_HttpsHostAddress = http://localhost:8081
 
-GET {{backend_HostAddress}}/weatherforecast/
+POST {{backend_HostAddress}}/auth/v1/register/
 Accept: application/json
 
 ###
