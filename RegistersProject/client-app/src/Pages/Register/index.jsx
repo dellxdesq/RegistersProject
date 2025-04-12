@@ -5,11 +5,12 @@ import styles from "./styles";
 export default function RegisterPage() {
     const navigate = useNavigate();
     const [email, setEmail] = useState("");
+    const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [repeatPassword, setRepeatPassword] = useState("");
-    const [error, setError] = useState(""); // состояние для текста ошибки
+    const [error, setError] = useState("");
 
-    const handleRegister = (e) => {
+    const handleRegister = async (e) => {
         e.preventDefault();
 
         if (password !== repeatPassword) {
@@ -19,14 +20,52 @@ export default function RegisterPage() {
 
         setError("");
 
-        navigate("/auth");
+        try {
+            const response = await fetch("https://localhost:8081/api/v1/auth/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    username,
+                    email,
+                    password,
+                }),
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                setError(errorText || "Ошибка регистрации");
+                return;
+            }
+
+            const data = await response.json();
+            localStorage.setItem("auth_token", data.token);
+            navigate("/auth");
+        } catch (err) {
+            setError("Ошибка подключения к серверу");
+            console.error(err);
+        }
     };
+
 
     return (
         <div style={styles.registerPage}>
             <div style={styles.registerContainer}>
                 <h1 style={styles.registerTitle}>Регистрация</h1>
                 <form onSubmit={handleRegister}>
+                    <div style={styles.formGroup}>
+                        <label htmlFor="username">Логин</label>
+                        <input
+                            id="username"
+                            type="username"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            required
+                            placeholder="username"
+                            style={styles.input}
+                        />
+                    </div>
                     <div style={styles.formGroup}>
                         <label htmlFor="email">Почта</label>
                         <input
@@ -51,6 +90,7 @@ export default function RegisterPage() {
                             style={styles.input}
                         />
                     </div>
+
                     <div style={styles.formGroup}>
                         <label htmlFor="repeatPassword">Повтор пароля</label>
                         <input
@@ -63,7 +103,7 @@ export default function RegisterPage() {
                             style={styles.input}
                         />
                         {error && (
-                            <p style={{ color: "red", marginTop: "5px", fontSize: "14px" }}>
+                            <p style={{color: "red", marginTop: "5px", fontSize: "14px"}}>
                                 {error}
                             </p>
                         )}
