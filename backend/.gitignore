@@ -1,4 +1,6 @@
 ## Visual Studio è .NET ##
+backend/appsettings.Development.json
+*.env
 bin/
 obj/
 .vs/
