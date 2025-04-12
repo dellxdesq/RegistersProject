@@ -4,3 +4,6 @@
 
 /.vs
 /RegistersProject/bin/Debug/net9.0
+/RegistersProject/obj
+/backend/appsettings.Development.json
+/backend/appsettings.Development.json
