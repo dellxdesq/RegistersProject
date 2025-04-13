@@ -4,12 +4,37 @@ import styles from "./styles";
 
 export default function LoginPage() {
     const navigate = useNavigate();
-    const [email, setEmail] = useState("");
+    const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
-
-    const handleLogin = (e) => {
+    
+    const handleLogin = async (e) => {
         e.preventDefault();
-        navigate("/");
+        
+        try {
+            const response = await fetch("https://localhost:8081/api/v1/auth/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    username,
+                    password,
+                }),
+            });
+
+            if (!response.ok) {
+                const errorText = "Введите правильные данные";
+                alert(errorText)
+                return;
+            }
+
+            const data = await response.json();
+            localStorage.setItem("auth_token", data.token);
+            navigate("/");
+        } catch (err) {
+            
+            console.error(err);
+        }
     };
 
     return (
@@ -18,14 +43,14 @@ export default function LoginPage() {
                 <h1 style={styles.loginTitle}>Добро пожаловать</h1>
                 <form onSubmit={handleLogin}>
                     <div style={styles.formGroup}>
-                        <label htmlFor="email">Почта</label>
+                        <label htmlFor="username">Логин</label>
                         <input
-                            id="email"
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            id="username"
+                            type="username"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
                             required
-                            placeholder="you@example.com"
+                            placeholder="username"
                             style={styles.input}
                         />
                     </div>
