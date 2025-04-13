@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./styles";
+import { useToast } from "../../Context/ToastContext";
 
 export default function RegisterPage() {
     const navigate = useNavigate();
@@ -9,12 +10,14 @@ export default function RegisterPage() {
     const [password, setPassword] = useState("");
     const [repeatPassword, setRepeatPassword] = useState("");
     const [error, setError] = useState("");
+    const { showToast } = useToast();
 
     const handleRegister = async (e) => {
         e.preventDefault();
 
+        
         if (password !== repeatPassword) {
-            setError("Пароли не совпадают");
+            showToast("Пароли не совпадают");
             return;
         }
 
@@ -32,13 +35,13 @@ export default function RegisterPage() {
                     password,
                 }),
             });
-
+            
             if (!response.ok) {
                 const errorText = await response.text();
                 setError(errorText || "Ошибка регистрации");
                 return;
             }
-
+            
             const data = await response.json();
             localStorage.setItem("auth_token", data.token);
             navigate("/auth");

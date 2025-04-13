@@ -3,15 +3,19 @@ import AuthPage from "./Pages/Auth";
 import RegisterPage from "./Pages/Register"
 import MainPage from "./Pages/Main"
 import PersonalPage from "./Pages/Personal";
+import {ToastProvider} from "./Context/ToastContext";
+
 function App() {
   return (
       <Router>
-        <Routes>
-            <Route path="/auth" element={<AuthPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/" element={<MainPage />} />
-            <Route path="/personal" element={<PersonalPage />} />
-        </Routes>
+          <ToastProvider>
+            <Routes>
+                <Route path="/auth" element={<AuthPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                <Route path="/" element={<MainPage />} />
+                <Route path="/personal" element={<PersonalPage />} />
+            </Routes>
+          </ToastProvider>
       </Router>
   );
 }

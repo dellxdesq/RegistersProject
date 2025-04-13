@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./styles";
+import { useToast } from "../../Context/ToastContext";
 
 export default function LoginPage() {
     const navigate = useNavigate();
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const { showToast } = useToast();
     
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -23,8 +25,7 @@ export default function LoginPage() {
             });
 
             if (!response.ok) {
-                const errorText = "Введите правильные данные";
-                alert(errorText)
+                showToast("Логин или пароль не верный")
                 return;
             }
 
