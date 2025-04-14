@@ -6,12 +6,19 @@ export default function Index() {
 
     return (
         <div style={styles.navbar}>
-            <button style={styles.navButton} onClick={() => navigate("/")}>
-                Главная
-            </button>
-            <button onClick={() => navigate("/personal")} style={styles.navButton}>
-                Личный кабинет
-            </button>
+            <div style={styles.leftGroup}>
+                <button style={styles.navButton} onClick={() => navigate("/")}>
+                    Главная
+                </button>
+            </div>
+            <div style={styles.rightGroup}>
+                <button onClick={() => navigate("/auth")} style={styles.navButton}>
+                    Войти
+                </button>
+                <button onClick={() => navigate("/personal")} style={styles.navButton}>
+                    Личный кабинет
+                </button>
+            </div>
         </div>
     );
 }

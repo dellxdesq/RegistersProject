@@ -14,6 +14,16 @@ const styles = {
         fontSize: "16px",
         borderRadius: "8px",
         cursor: "pointer",
+        marginLeft: "10px",
+    },
+    leftGroup: {
+        display: "flex",
+        alignItems: "center",
+    },
+    rightGroup: {
+        display: "flex",
+        alignItems: "center",
     },
 };
+
 export default styles;
