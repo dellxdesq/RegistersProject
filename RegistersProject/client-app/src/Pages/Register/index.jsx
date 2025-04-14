@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./styles";
 import { useToast } from "../../Context/ToastContext";
+import AuthButton from "../../Components/AuthButton"
 
 export default function RegisterPage() {
     const navigate = useNavigate();
@@ -111,9 +112,10 @@ export default function RegisterPage() {
                             </p>
                         )}
                     </div>
-                    <button type="submit" style={styles.registerButton}>
-                        Регистрация
-                    </button>
+
+                </form>
+                <form onSubmit={handleRegister}>
+                    <AuthButton text="Регистрация" type="submit"/>
                 </form>
             </div>
         </div>

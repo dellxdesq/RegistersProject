@@ -1,6 +1,6 @@
-import styles from "../Pages/Main/styles";
+import styles from "../SearchList/styles";
 
-export default function SearchList({ value, onChange }) {
+export default function Index({ value, onChange }) {
     return (
         <input
             type="text"

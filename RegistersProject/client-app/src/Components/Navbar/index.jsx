@@ -1,7 +1,7 @@
-import styles from "../Pages/Main/styles";
+import styles from "../Navbar/styles";
 import { useNavigate } from "react-router-dom";
 
-export default function Navbar() {
+export default function Index() {
     const navigate = useNavigate();
 
     return (
