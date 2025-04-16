@@ -4,21 +4,29 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Npgsql;
+using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 
 DotNetEnv.Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Сервисы
 builder.Services.AddControllers();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddLogging();
 builder.Services.AddOpenApi();
 builder.Services.AddScoped<ExternalApiService>();
-builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<RegistryService>();
 builder.Services.AddScoped<MinioService>();
 
+// HTTP-клиенты
+builder.Services.AddHttpClient<AuthHttpClient>(client =>
+{
+    client.BaseAddress = new Uri("http://auth-service/");
+});
+
+// Аутентификация (ОДИН вызов AddJwtBearer)
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -28,28 +36,28 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
             ValidateIssuer = false,
-            ValidateAudience = false
+            ValidateAudience = false,
+            ValidateLifetime = true,
+
+            // синхронная валидация
+            SignatureValidator = (token, _) =>
+            {
+                using var scope = builder.Services.BuildServiceProvider().CreateScope();
+                var authClient = scope.ServiceProvider.GetRequiredService<AuthHttpClient>();
+                return authClient.ValidateToken(token)
+                    ? new JwtSecurityToken(token)
+                    : null;
+            }
         };
     });
 
 builder.Services.AddAuthorization();
 
-// CORS политика React
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("ReactApp", policy =>
-    {
-        policy.WithOrigins("http://localhost:3000")
-              .AllowAnyHeader()
-              .AllowAnyMethod();
-    });
-});
-
-// Добавьте контекст базы данных
+// Контекст базы данных
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQL")));
 
-//автозапуск https профиля
+// HTTPS
 builder.WebHost.ConfigureKestrel(options => {
     options.ListenLocalhost(8081, listenOptions => {
         listenOptions.UseHttps();
@@ -58,14 +66,14 @@ builder.WebHost.ConfigureKestrel(options => {
 
 var app = builder.Build();
 
-// Убедитесь, что база данных создана
+// Инициализация БД
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.EnsureCreated();
 }
 
-// Configure the HTTP request pipeline.
+// middleware
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -73,7 +81,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
-app.UseCors("ReactApp");
 app.UseAuthorization();
 app.MapControllers();
 

@@ -1,4 +1,6 @@
-﻿using backend.Services;
+﻿ // TODO на удаление вынес в AuthService
+
+using backend.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers

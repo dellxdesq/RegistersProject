@@ -1,4 +1,5 @@
-﻿namespace backend.Models
+﻿// TODO на удаление вынес в AuthService
+namespace backend.Models
 {
     public class User
     {
