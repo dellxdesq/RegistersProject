@@ -4,6 +4,17 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("ReactApp", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000", "https://localhost:3000")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
 builder.Services.AddReverseProxy()
     .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
 
@@ -40,7 +51,8 @@ builder.WebHost.ConfigureKestrel(options =>
 });
 
 var app = builder.Build();
-
+app.UseHttpsRedirection();
+app.UseCors("ReactApp");
 app.UseAuthentication();
 app.UseAuthorization();
 
