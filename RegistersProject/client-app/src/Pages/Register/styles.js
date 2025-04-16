@@ -21,30 +21,6 @@ const styles = {
         marginBottom: "20px",
         fontWeight: "bold",
     },
-    formGroup: {
-        display: "flex",
-        flexDirection: "column",
-        marginBottom: "20px",
-        textAlign: "left",
-    },
-    input: {
-        padding: "10px",
-        fontSize: "16px",
-        border: "none",
-        borderBottom: "1px solid #ccc",
-        outline: "none",
-    },
-    registerButton: {
-        width: "100%",
-        padding: "12px",
-        fontSize: "16px",
-        border: "none",
-        borderRadius: "25px",
-        background: "linear-gradient(to right, #00c6ff, #7f00ff)",
-        color: "#fff",
-        cursor: "pointer",
-        marginTop: "10px",
-    },
 };
 
 export default styles;
