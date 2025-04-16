@@ -1,0 +1,101 @@
+version: "3.9"
+services:
+
+  postgres:
+    image: postgres:17
+    container_name: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  minio:
+    image: minio/minio
+    container_name: minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    command: server /data --console-address ":9001"
+
+  authservice:
+    build:
+      context: .
+      dockerfile: AuthService/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Jwt__Key=${JWT_KEY}
+      - Jwt__Issuer=${JWT_ISSUER}
+      - Jwt__Audience=${JWT_AUDIENCE}
+      - ConnectionStrings__AuthDB=Host=postgres;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+    depends_on:
+      - postgres
+    ports:
+      - "5000:5000"
+
+  registryservice:
+    build:
+      context: .
+      dockerfile: RegistryService/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Jwt__Key=${JWT_KEY}
+      - ConnectionStrings__PostgreSQL=Host=postgres;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+    depends_on:
+      - postgres
+    ports:
+      - "5004:5004"
+
+  storageservice:
+    build:
+      context: .
+      dockerfile: StorageService/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Jwt__Key=${JWT_KEY}
+      - Minio__Endpoint=${MINIO_ENDPOINT}
+      - Minio__AccessKey=${MINIO_ROOT_USER}
+      - Minio__SecretKey=${MINIO_ROOT_PASSWORD}
+    depends_on:
+      - minio
+    ports:
+      - "5002:5002"
+
+  externalservice:
+    build:
+      context: .
+      dockerfile: ExternalService/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Jwt__Key=${JWT_KEY}
+    ports:
+      - "5006:5006"
+
+  apigateway:
+    build:
+      context: .
+      dockerfile: ApiGateway/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Jwt__Key=${JWT_KEY}
+      - Jwt__Issuer=${JWT_ISSUER}
+      - Jwt__Audience=${JWT_AUDIENCE}
+    ports:
+      - "8080:8080"
+    depends_on:
+      - authservice
+      - registryservice
+      - storageservice
+      - externalservice
+
+volumes:
+  pgdata:
+  minio_data:
