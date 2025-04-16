@@ -1,0 +1,57 @@
+﻿using Minio;
+using Minio.DataModel.Args;
+
+namespace StorageService.Services
+{
+    public class MinioService
+    {
+        private readonly MinioClient _minio;
+        private readonly string _bucketName;
+        private readonly ILogger<MinioService> _logger;
+
+        public MinioService(IConfiguration config, ILogger<MinioService> logger)
+        {
+            _minio = (MinioClient?)new MinioClient()
+                .WithEndpoint(config["MinIO:Endpoint"] ?? throw new ArgumentNullException())
+                .WithCredentials(
+                    config["MinIO:AccessKey"] ?? throw new ArgumentNullException(),
+                    config["MinIO:SecretKey"] ?? throw new ArgumentNullException())
+                .Build();
+            _bucketName = config["MinIO:BucketName"] ?? throw new ArgumentNullException();
+            _logger = logger;
+        }
+
+        public async Task UploadFileAsync(IFormFile file)
+        {
+            var beArgs = new BucketExistsArgs().WithBucket(_bucketName);
+            var exist = await _minio.BucketExistsAsync(beArgs);
+
+            if (!exist)
+            {
+                var mbArgs = new MakeBucketArgs().WithBucket(_bucketName);
+                await _minio.MakeBucketAsync(mbArgs);
+            }
+
+            var poArgs = new PutObjectArgs()
+                .WithBucket(_bucketName)
+                .WithObject(file.FileName)
+                .WithStreamData(file.OpenReadStream())
+                .WithObjectSize(file.Length);
+
+            await _minio.PutObjectAsync(poArgs);
+        }
+
+        public async Task<Stream> DownloadFileAsync(string objectName)
+        {
+            var stream = new MemoryStream();
+            var args = new GetObjectArgs()
+                .WithBucket(_bucketName)
+                .WithObject(objectName)
+                .WithCallbackStream(data => data.CopyTo(stream));
+
+            await _minio.GetObjectAsync(args);
+            stream.Position = 0;
+            return stream;
+        }
+    }
+}
