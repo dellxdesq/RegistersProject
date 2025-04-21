@@ -7,7 +7,10 @@ export default function Index() {
     return (
         <div style={styles.navbar}>
             <div style={styles.leftGroup}>
-                <button style={styles.navButton} onClick={() => navigate("/")}>
+                <button
+                    style={styles.navButton}
+                    onClick={() => navigate("/", {state: {mode: "all"}})}
+                >
                     Главная
                 </button>
             </div>
