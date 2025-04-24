@@ -45,10 +45,17 @@ namespace AuthService.Controllers
         }
 
         [HttpGet("validate")]
-        public IActionResult ValidateToken([FromQuery] string token)
+        public IActionResult ValidateToken()
         {
             try
             {
+                var authHeader = HttpContext.Request.Headers["Authorization"].ToString();
+
+                if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
+                    return Unauthorized(new { Error = "Missing or invalid Authorization header" });
+
+                var token = authHeader.Substring("Bearer ".Length).Trim();
+
                 var isValid = _authService.ValidateToken(token);
                 if (!isValid)
                     return Unauthorized(new { Error = "Invalid token" });
