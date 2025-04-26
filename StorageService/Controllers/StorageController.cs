@@ -17,8 +17,8 @@ namespace StorageService.Controllers
         [HttpPost("upload")]
         public async Task<IActionResult> Upload(IFormFile file)
         {
-            await _minioService.UploadFileAsync(file);
-            return Ok(new { Message = "File uploaded successfully" });
+            var fileName = await _minioService.UploadFileAsync(file);
+            return Ok(new { Message = "Файл успешно загружен", FileName = fileName });
         }
 
         [HttpGet("download/{objectName}")]

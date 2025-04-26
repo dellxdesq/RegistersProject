@@ -12,5 +12,7 @@ namespace RegistryService.Models
         public string FileFormat { get; set; } = string.Empty;
         public string Organization { get; set; } = string.Empty;
         public int RowsCount { get; set; }
+
+        public string? FileName { get; set; } // имя файла в MinIO
     }
 }

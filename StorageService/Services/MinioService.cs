@@ -21,7 +21,7 @@ namespace StorageService.Services
             _logger = logger;
         }
 
-        public async Task UploadFileAsync(IFormFile file)
+        public async Task<string> UploadFileAsync(IFormFile file)
         {
             var beArgs = new BucketExistsArgs().WithBucket(_bucketName);
             var exist = await _minio.BucketExistsAsync(beArgs);
@@ -32,13 +32,16 @@ namespace StorageService.Services
                 await _minio.MakeBucketAsync(mbArgs);
             }
 
+            var uniqueFileName = $"{Guid.NewGuid()}_{file.FileName}";
+
             var poArgs = new PutObjectArgs()
                 .WithBucket(_bucketName)
-                .WithObject(file.FileName)
+                .WithObject(uniqueFileName)
                 .WithStreamData(file.OpenReadStream())
                 .WithObjectSize(file.Length);
 
             await _minio.PutObjectAsync(poArgs);
+            return uniqueFileName;
         }
 
         public async Task<Stream> DownloadFileAsync(string objectName)

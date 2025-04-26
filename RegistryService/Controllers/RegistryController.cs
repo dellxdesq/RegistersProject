@@ -72,6 +72,26 @@ namespace RegistryServiceProject.Controllers
             var registries = await _registryService.GetAvailableRegistryListForUserAsync(id);
             return Ok(registries);
         }
+
+        [HttpGet("{id}/download")]
+        public async Task<IActionResult> Download(int id)
+        {
+            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(userIdStr, out var userId))
+                return Unauthorized();
+
+            var registry = await _registryService.GetRegistryWithMetaIfUserHasAccessAsync(id, userId);
+            if (registry?.Meta == null || string.IsNullOrEmpty(registry.Meta.FileName))
+                return NotFound("Файл не прикреплён к реестру");
+
+            var fileName = registry.Meta.FileName;
+
+            // Скачиваем файл с MinIO через StorageService
+            var httpClient = new HttpClient(); // лучше через DI
+            var stream = await httpClient.GetStreamAsync($"http://localhost:5002/api/v1/storage/download/{fileName}");
+
+            return File(stream, "application/octet-stream", fileName);
+        }
     }
 }
     

@@ -10,5 +10,6 @@ namespace RegistryServiceProject.Models.Dto
         public required string Organization { get; set; }
         public int RowsCount { get; set; }
         public AccessLevel DefaultAccessLevel { get; set; }
+        public string FileName { get; set; } = string.Empty;
     }
 }

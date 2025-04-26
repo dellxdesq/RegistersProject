@@ -92,7 +92,8 @@ namespace RegistryServiceProject.Services
                 RegistryId = registry.Id,
                 FileFormat = request.FileFormat,
                 Organization = request.Organization,
-                RowsCount = request.RowsCount
+                RowsCount = request.RowsCount,
+                FileName = request.FileName //имя файла в MinIO
             };
 
             _db.RegistryMetas.Add(meta);
