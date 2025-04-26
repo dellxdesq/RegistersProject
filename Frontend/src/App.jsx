@@ -4,7 +4,7 @@ import RegisterPage from "./Pages/Register"
 import MainPage from "./Pages/Main"
 import PersonalPage from "./Pages/Personal";
 import {ToastProvider} from "./Context/ToastContext";
-
+import RegistryPage from "./Pages/Registry";
 function App() {
     return (
         <Router>
@@ -14,6 +14,7 @@ function App() {
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/" element={<MainPage />} />
                     <Route path="/personal" element={<PersonalPage />} />
+                    <Route path="/registry/:id" element={<RegistryPage />} />
                 </Routes>
             </ToastProvider>
         </Router>
