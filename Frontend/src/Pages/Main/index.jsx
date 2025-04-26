@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Navbar from "../../Components/Navbar";
 import SearchList from "../../Components/SearchList";
 import RegistersList from "../../Components/RegistersList";
 import UploadModal from "../../Modals/UploadModal";
+import { validateToken } from "../../Api/validateAuth";
+import { fetchRegistries } from "../../Api/getRegistry";
 import styles from "./styles";
 
 const allData = Array.from({ length: 10 }, (_, i) => ({
@@ -23,6 +25,7 @@ const availableData = Array.from({ length: 8 }, (_, i) => ({
 
 export default function MainPage() {
     const location = useLocation();
+    const navigate = useNavigate();
     const initialMode = location.state?.mode || "all";
     const [search, setSearch] = useState("");
     const [mode, setMode] = useState(initialMode);
@@ -33,6 +36,30 @@ export default function MainPage() {
             setMode(location.state.mode);
         }
     }, [location.state]);
+
+    useEffect(() => {
+        async function checkAuth() {
+            const result = await validateToken();
+            if (!result.isValid) {
+                navigate("/auth");
+            }
+        }
+        checkAuth();
+    }, [navigate]);
+
+    useEffect(() => {
+        async function loadRegistries() {
+            try {
+                const registries = await fetchRegistries();
+                console.log("Полученные реестры:", registries);
+               
+            } catch (error) {
+                console.error("Не удалось загрузить реестры:", error);
+            }
+        }
+
+        loadRegistries();
+    }, []);
 
     const getDataByMode = () => {
         switch (mode) {
