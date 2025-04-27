@@ -1,4 +1,6 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { fetchRegistryById } from "../../Api/getRegistryById";
 import RegistryInfo from "../../Components/RegistryInfo";
 import RegistryTable from "../../Components/RegistryTable";
 import RegistryActions from "../../Components/ActionsButtons";
@@ -6,20 +8,48 @@ import styles from "./styles";
 
 export default function RegistryPage() {
     const { id } = useParams();
+    const navigate = useNavigate();
 
-    const info = {
-        name: `–ÂÂÒÚ π${id}`,
-        description: `ŒÔËÒ‡ÌËÂ ÂÂÒÚ‡ π${id}`,
-        fileFormat: "Excel",
-        organization: "√ÓÒÊËÎÍÓÏÌ‡‰ÁÓ",
-        rowsCount: 6543,
-        defaultAccessLevel: 3
-    };
+    const [info, setInfo] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
 
+    useEffect(() => {
+        async function loadRegistry() {
+            try {
+                const data = await fetchRegistryById(id);
+                setInfo({
+                    name: data.name,
+                    description: data.description,
+                    fileFormat: data.meta?.fileFormat || "–ù–µ —É–∫–∞–∑–∞–Ω–æ",
+                    organization: data.meta?.organization || "–ù–µ —É–∫–∞–∑–∞–Ω–æ",
+                    rowsCount: data.meta?.rowsCount || 0,
+                    defaultAccessLevel: data.defaultAccessLevel,
+                });
+            } catch (err) {
+                console.error(err.message);
+                if (err.message === "–ù–µ—Ç –¥–æ—Å—Ç—É–ø–∞ –∫ —Ä–µ–µ—Å—Ç—Ä—É") {
+                    navigate("/");
+                } else {
+                    setError(err.message);
+                }
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        loadRegistry();
+    }, [id, navigate]);
+
+    if (loading) return <div>–ó–∞–≥—Ä—É–∑–∫–∞ —Ä–µ–µ—Å—Ç—Ä–∞...</div>;
+    if (error) return <div>–û—à–∏–±–∫–∞: {error}</div>;
+    if (!info) return <div>–†–µ–µ—Å—Ç—Ä –Ω–µ –Ω–∞–π–¥–µ–Ω</div>;
+
+    // –ó–∞–≥–ª—É—à–∫–∞ –¥–ª—è —Ç–∞–±–ª–∏—Ü—ã
     const data = {
-        headers: ["ID", "»Ïˇ", "ƒ‡Ú‡", "“ËÔ"],
-        top: Array.from({ length: 5 }, (_, i) => [`${i}`, `—ÚÓÍ‡ ${i}`, `2023-0${i + 1}-01`, "“ËÔ A"]),
-        bottom: Array.from({ length: 5 }, (_, i) => [`${95 + i}`, `—ÚÓÍ‡ ${95 + i}`, `2023-1${i + 1}-01`, "“ËÔ B"]),
+        headers: ["ID", "–ò–º—è", "–î–∞—Ç–∞", "–¢–∏–ø"],
+        top: Array.from({ length: 5 }, (_, i) => [`${i}`, `–°—Ç—Ä–æ–∫–∞ ${i}`, `2023-0${i + 1}-01`, "–¢–∏–ø A"]),
+        bottom: Array.from({ length: 5 }, (_, i) => [`${95 + i}`, `–°—Ç—Ä–æ–∫–∞ ${95 + i}`, `2023-1${i + 1}-01`, "–¢–∏–ø B"]),
     };
 
     return (

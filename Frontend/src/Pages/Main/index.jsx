@@ -8,21 +8,6 @@ import { validateToken } from "../../Api/validateAuth";
 import { fetchRegistries } from "../../Api/getRegistry";
 import styles from "./styles";
 
-const allData = Array.from({ length: 10 }, (_, i) => ({
-    id: i + 1,
-    name: `Общий реестр ${i + 1}`
-}));
-
-const uploadedData = Array.from({ length: 6 }, (_, i) => ({
-    id: i + 101,
-    name: `Загруженный ${i + 1}`
-}));
-
-const availableData = Array.from({ length: 8 }, (_, i) => ({
-    id: i + 201,
-    name: `Доступный ${i + 1}`
-}));
-
 export default function MainPage() {
     const location = useLocation();
     const navigate = useNavigate();
@@ -30,6 +15,8 @@ export default function MainPage() {
     const [search, setSearch] = useState("");
     const [mode, setMode] = useState(initialMode);
     const [isModalOpen, setModalOpen] = useState(false);
+    const [registries, setRegistries] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (location.state?.mode) {
@@ -50,11 +37,12 @@ export default function MainPage() {
     useEffect(() => {
         async function loadRegistries() {
             try {
-                const registries = await fetchRegistries();
-                console.log("Полученные реестры:", registries);
-               
+                const data = await fetchRegistries();
+                setRegistries(data);
             } catch (error) {
-                console.error("Не удалось загрузить реестры:", error);
+                console.error("Ошибка загрузки реестров:", error);
+            } finally {
+                setLoading(false);
             }
         }
 
@@ -64,20 +52,19 @@ export default function MainPage() {
     const getDataByMode = () => {
         switch (mode) {
             case "uploaded":
-                return uploadedData;
+                return registries.filter(r => r.defaultAccessLevel === 2);
             case "available":
-                return availableData;
+                return registries.filter(r => r.defaultAccessLevel === 1);
             case "all":
             default:
-                return allData;
+                return registries;
         }
     };
-
+    
     const filteredList = getDataByMode().filter(item =>
         item.name.toLowerCase().includes(search.toLowerCase())
     );
-
-
+    
     return (
         <div style={styles.container}>
             <Navbar />

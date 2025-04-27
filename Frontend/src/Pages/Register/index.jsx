@@ -32,7 +32,7 @@ export default function RegisterPage() {
                 return;
             }
 
-            localStorage.setItem("auth_token", result.data.token);
+            localStorage.setItem("token", result.data.token);
             navigate("/auth");
         } catch (err) {
             setError("Ошибка подключения к серверу");

@@ -11,9 +11,9 @@ export default function RegistryActions() {
 
     return (
         <div style={styles.actionsWrapper}>
-            <div style={styles.status}>Доступ: Требуется запрос</div>
+            <div style={styles.status}>Р”РѕСЃС‚СѓРї: РўСЂРµР±СѓРµС‚СЃСЏ Р·Р°РїСЂРѕСЃ</div>
             <div style={styles.buttonGroup}>
-                {["Запросить доступ", "Сделать срез", "Сделать график"].map((text, index) => (
+                {["Р—Р°РїСЂРѕСЃРёС‚СЊ РґРѕСЃС‚СѓРї", "РЎРґРµР»Р°С‚СЊ СЃСЂРµР·", "РЎРґРµР»Р°С‚СЊ РіСЂР°С„РёРє"].map((text, index) => (
                     <button
                         key={index}
                         style={getButtonStyle(index)}

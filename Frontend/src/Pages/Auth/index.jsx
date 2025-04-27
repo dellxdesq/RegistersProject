@@ -21,7 +21,7 @@ export default function LoginPage() {
             return;
         }
 
-        localStorage.setItem("auth_token", result.data.token);
+        localStorage.setItem("token", result.data.token);
         navigate("/");
     };
 

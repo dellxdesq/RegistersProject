@@ -3,11 +3,11 @@ import styles from "./styles";
 export default function RegistryInfo({ info }) {
     return (
         <div style={styles.container}>
-            <div style={styles.infoItem}><strong>Описание:</strong> {info.description}</div>
-            <div style={styles.infoItem}><strong>Формат файла:</strong> {info.fileFormat}</div>
-            <div style={styles.infoItem}><strong>Организация:</strong> {info.organization}</div>
-            <div style={styles.infoItem}><strong>Количество строк:</strong> {info.rowsCount}</div>
-            <div style={styles.infoItem}><strong>Уровень доступа:</strong> {info.defaultAccessLevel}</div>
+            <div style={styles.infoItem}><strong>РћРїРёСЃР°РЅРёРµ:</strong> {info.description}</div>
+            <div style={styles.infoItem}><strong>Р¤РѕСЂРјР°С‚ С„Р°Р№Р»Р°:</strong> {info.fileFormat}</div>
+            <div style={styles.infoItem}><strong>РћСЂРіР°РЅРёР·Р°С†РёСЏ:</strong> {info.organization}</div>
+            <div style={styles.infoItem}><strong>РљРѕР»РёС‡РµСЃС‚РІРѕ СЃС‚СЂРѕРє:</strong> {info.rowsCount}</div>
+            <div style={styles.infoItem}><strong>РЈСЂРѕРІРµРЅСЊ РґРѕСЃС‚СѓРїР°:</strong> {info.defaultAccessLevel}</div>
         </div>
     );
 }

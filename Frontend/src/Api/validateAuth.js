@@ -2,7 +2,7 @@ export async function validateToken() {
     const token = localStorage.getItem("token");
 
     if (!token) {
-        return { isValid: false, error: "Токен отсутствует" };
+        return { isValid: false, error: "РўРѕРєРµРЅ РѕС‚СЃСѓС‚СЃС‚РІСѓРµС‚" };
     }
 
     try {
@@ -18,7 +18,7 @@ export async function validateToken() {
             if (errorText.includes("Invalid token")) {
                 return { isValid: false, error: "Invalid token" };
             } else {
-                throw new Error("Ошибка запроса: " + response.status);
+                throw new Error("РћС€РёР±РєР° Р·Р°РїСЂРѕСЃР°: " + response.status);
             }
         }
 
@@ -29,7 +29,7 @@ export async function validateToken() {
         };
 
     } catch (error) {
-        console.error("Ошибка при валидации токена:", error);
+        console.error("РћС€РёР±РєР° РїСЂРё РІР°Р»РёРґР°С†РёРё С‚РѕРєРµРЅР°:", error);
         return { isValid: false, error: error.message };
     }
 }

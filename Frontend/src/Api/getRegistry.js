@@ -2,7 +2,7 @@ export async function fetchRegistries() {
     const token = localStorage.getItem("token");
 
     if (!token) {
-        throw new Error("Токен отсутствует");
+        throw new Error("РўРѕРєРµРЅ РѕС‚СЃСѓС‚СЃС‚РІСѓРµС‚");
     }
 
     try {
@@ -14,14 +14,14 @@ export async function fetchRegistries() {
         });
 
         if (!response.ok) {
-            throw new Error(`Ошибка загрузки реестров: ${response.status}`);
+            throw new Error(`РћС€РёР±РєР° Р·Р°РіСЂСѓР·РєРё СЂРµРµСЃС‚СЂРѕРІ: ${response.status}`);
         }
 
         const data = await response.json();
-        return data; // это будет массив реестров
+        return data;
 
     } catch (error) {
-        console.error("Ошибка при получении реестров:", error);
+        console.error("РћС€РёР±РєР° РїСЂРё РїРѕР»СѓС‡РµРЅРёРё СЂРµРµСЃС‚СЂРѕРІ:", error);
         throw error;
     }
 }
