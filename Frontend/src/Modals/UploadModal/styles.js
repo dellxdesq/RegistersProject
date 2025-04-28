@@ -1,0 +1,71 @@
+const styles = {
+    overlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    animation: 'fadeIn 0.3s ease-in-out',
+    zIndex: 999,
+},
+modal: {
+    background: 'white',
+    padding: '30px',
+    borderRadius: '10px',
+    width: '400px',
+    boxShadow: '0 5px 15px rgba(0,0,0,0.3)',
+    animation: 'scaleIn 0.3s ease-in-out',
+},
+form: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '15px',
+},
+input: {
+    width: '100%',
+    padding: '8px',
+    borderRadius: '6px',
+    border: '1px solid #ccc',
+    fontFamily: 'inherit',
+},
+textarea: {
+    width: '100%',
+    padding: '8px',
+    borderRadius: '6px',
+    border: '1px solid #ccc',
+    fontFamily: 'inherit',
+},
+checkboxGroup: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+},
+buttons: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    gap: '10px',
+    marginTop: '10px',
+},
+upload: {
+    backgroundColor: '#007bff',
+    color: 'white',
+    padding: '10px 20px',
+    border: 'none',
+    borderRadius: '6px',
+    cursor: 'pointer',
+},
+cancel: {
+    backgroundColor: '#ccc',
+    color: '#333',
+    padding: '10px 20px',
+    border: 'none',
+    borderRadius: '6px',
+    cursor: 'pointer',
+},
+};
+
+export default styles;
