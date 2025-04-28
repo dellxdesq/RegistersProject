@@ -1,33 +1,32 @@
 const styles = {
     scrollWrapper: {
         overflowX: "auto",
-        maxWidth: "100%",
         border: "1px solid #ccc",
         borderRadius: 8,
-        marginBottom: 24,
+        backgroundColor: "#fff",
+        maxHeight: "250px",
     },
     table: {
         width: "100%",
         borderCollapse: "collapse",
         minWidth: "600px",
+        fontSize: 14,
     },
     th: {
-        backgroundColor: "#f5f5f5",
-        padding: "10px 16px",
+        backgroundColor: "#f0f0f0",
+        padding: "8px 12px",
         borderBottom: "1px solid #ddd",
         textAlign: "left",
-        fontWeight: "bold",
     },
     td: {
-        padding: "10px 16px",
+        padding: "8px 12px",
         borderBottom: "1px solid #eee",
     },
     skipRow: {
         textAlign: "center",
-        padding: "10px",
+        padding: "8px",
         fontStyle: "italic",
         color: "#888",
-        backgroundColor: "#fafafa",
     },
     message: {
         padding: 16,

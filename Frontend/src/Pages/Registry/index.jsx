@@ -4,6 +4,7 @@ import { fetchRegistryById } from "../../Api/getRegistryById";
 import RegistryInfo from "../../Components/RegistryInfo";
 import RegistryTable from "../../Components/RegistryTable";
 import RegistryActions from "../../Components/ActionsButtons";
+import Navbar from "../../Components/Navbar";
 import styles from "./styles";
 
 export default function RegistryPage() {
@@ -45,7 +46,6 @@ export default function RegistryPage() {
     if (error) return <div>Ошибка: {error}</div>;
     if (!info) return <div>Реестр не найден</div>;
 
-    // Заглушка для таблицы
     const data = {
         headers: ["ID", "Имя", "Дата", "Тип"],
         top: Array.from({ length: 5 }, (_, i) => [`${i}`, `Строка ${i}`, `2023-0${i + 1}-01`, "Тип A"]),
@@ -53,12 +53,16 @@ export default function RegistryPage() {
     };
 
     return (
-        <div style={styles.container}>
-            <h1 style={styles.title}>{info.name}</h1>
-
-            <RegistryInfo info={info} />
-            <RegistryTable data={data} />
-            <RegistryActions />
+        <div style={styles.page}>
+            <Navbar />
+            <div style={styles.container}>
+                <h1 style={styles.title}>{info.name}</h1>
+                <div style={styles.content}>
+                    <RegistryInfo info={info} />
+                    <RegistryTable data={data} />
+                    <RegistryActions />
+                </div>
+            </div>
         </div>
     );
 }

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import styles from "../ActionsButtons";
+import styles from "./styles";
 
 export default function RegistryActions() {
     const [hovered, setHovered] = useState(null);

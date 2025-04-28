@@ -1,22 +1,27 @@
 const styles = {
     actionsWrapper: {
-        marginTop: "24px",
+        marginTop: "12px",
     },
     status: {
         fontWeight: "bold",
         marginBottom: "12px",
+        fontSize: "14px",
     },
     buttonGroup: {
         display: "flex",
+        justifyContent: "space-between",
         gap: "12px",
     },
     button: {
-        padding: "10px 16px",
+        flex: 1,
+        padding: "12px",
         border: "none",
-        background: "#3f51b5",
-        color: "white",
-        borderRadius: "6px",
+        background: "#61bbfb",
+        color: "black",
+        borderRadius: "8px",
+        fontSize: "14px",
         cursor: "pointer",
+        transition: "background 0.3s",
     },
     buttonHover: {
         background: "#2c3e9c",

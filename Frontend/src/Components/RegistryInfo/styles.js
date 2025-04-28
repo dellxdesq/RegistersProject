@@ -1,14 +1,13 @@
 const styles = {
     container: {
-        marginTop: 24,
-        padding: 20,
+        padding: 16,
         border: "1px solid #ccc",
         borderRadius: 8,
-        backgroundColor: "#fafafa",
+        backgroundColor: "#f9f9f9",
+        fontSize: 14,
     },
     infoItem: {
-        marginBottom: 12,
-        fontSize: 16,
+        marginBottom: 8,
     },
 };
 
