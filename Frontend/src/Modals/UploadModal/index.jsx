@@ -3,7 +3,7 @@ import styles from "./styles";
 import { addRegistry } from "../../Api/uploadRegistry";
 import { getFileFormat } from "../../Utils/getFileFormat";
 import { countFileRows } from "../../Utils/countFileRows";
-
+import {uploadRegistryFile} from "../../Api/uploadRegistryS3"
 export default function UploadModal({ isOpen, onClose }) {
     const [title, setTitle] = useState("");
     const [file, setFile] = useState(null);
@@ -47,6 +47,10 @@ export default function UploadModal({ isOpen, onClose }) {
                 return;
             }
 
+            
+            const uploadResult = await uploadRegistryFile(file, token);
+
+            
             const requestBody = {
                 name: title,
                 description: description,
@@ -54,7 +58,7 @@ export default function UploadModal({ isOpen, onClose }) {
                 organization: organization,
                 rowsCount: Number(rowsCount),
                 defaultAccessLevel: access.public ? 1 : access.personal ? 2 : 3,
-                fileName: file ? file.name : "",
+                fileName: uploadResult.name,
             };
 
             await addRegistry(requestBody, token);
