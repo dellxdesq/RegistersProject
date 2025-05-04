@@ -6,6 +6,7 @@ import RegistersList from "../../Components/RegistersList";
 import UploadModal from "../../Modals/UploadModal";
 import { validateToken } from "../../Api/validateAuth";
 import { fetchRegistries } from "../../Api/getRegistry";
+import { fetchUserRegistries } from "../../Api/getAvailableRegistries";
 import styles from "./styles";
 
 export default function MainPage() {
@@ -25,14 +26,35 @@ export default function MainPage() {
     }, [location.state]);
 
     useEffect(() => {
-        async function checkAuth() {
-            const result = await validateToken();
-            if (!result.isValid) {
-                navigate("/auth");
+        async function loadRegistries() {
+            try {
+                const userData = JSON.parse(localStorage.getItem("user_data"));
+                const token = localStorage.getItem("token");
+
+                if (!token) {
+                    console.error("Пользователь не авторизован");
+                    return;
+                }
+
+                let data = [];
+
+                if (mode === "available") {
+                    data = await fetchUserRegistries(userData.id, token);
+                } else {
+                    data = await fetchRegistries();
+                }
+
+                setRegistries(data);
+            } catch (error) {
+                console.error("Ошибка загрузки реестров:", error);
+            } finally {
+                setLoading(false);
             }
         }
-        checkAuth();
-    }, [navigate]);
+
+        loadRegistries();
+    }, [mode]); // добавили зависимость от mode
+
 
     useEffect(() => {
         async function loadRegistries() {
