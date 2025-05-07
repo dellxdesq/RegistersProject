@@ -1,14 +1,24 @@
 const personalInfoStyles = {
+    container: {
+        display: "flex",
+        justifyContent: "center", 
+        gap: "40px",              
+        marginTop: "100px",         
+        padding: "0 20px",
+    },
+    
     leftPanel: {
         backgroundColor: "#fff",
         padding: "30px",
         borderRadius: "10px",
         boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
         minWidth: "300px",
+
     },
     field: {
         marginBottom: "15px",
         fontSize: "16px",
+        paddingTop: "10px",
     },
     actionButton: {
         marginTop: "10px",

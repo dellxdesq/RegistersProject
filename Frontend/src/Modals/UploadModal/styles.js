@@ -26,7 +26,6 @@ form: {
     gap: '15px',
 },
 input: {
-    width: '100%',
     padding: '8px',
     borderRadius: '6px',
     border: '1px solid #ccc',
@@ -34,7 +33,9 @@ input: {
 },
 textarea: {
     width: '100%',
-    padding: '8px',
+    height: '100px',
+    padding: '1px',
+    resize: 'none',
     borderRadius: '6px',
     border: '1px solid #ccc',
     fontFamily: 'inherit',

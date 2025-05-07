@@ -8,6 +8,7 @@ const accessButtonsStyles = {
         flexDirection: "column",
         gap: "15px",
         minWidth: "250px",
+        margin: "auto",
     },
     rightButton: {
         padding: "10px 20px",
@@ -16,7 +17,7 @@ const accessButtonsStyles = {
         border: "none",
         borderRadius: "6px",
         cursor: "pointer",
-        textAlign: "left",
+        textAlign: "center",
     },
 };
 

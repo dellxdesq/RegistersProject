@@ -22,6 +22,7 @@ export default function LoginPage() {
         }
 
         localStorage.setItem("token", result.data.token);
+        localStorage.setItem("username", username);
         navigate("/");
     };
 
