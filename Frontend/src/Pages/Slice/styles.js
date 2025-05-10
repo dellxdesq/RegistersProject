@@ -1,7 +1,12 @@
 const sliceStyles = {
+    page :{
+        display: "flex",
+        flexDirection: "column",
+        height: "100vh",
+        fontFamily: "Consolas",
+    },
     container: {
         padding: "20px",
-        fontFamily: "Arial, sans-serif",
     },
     table: {
         width: "100%",

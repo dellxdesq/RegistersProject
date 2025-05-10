@@ -22,8 +22,8 @@ export default function OpenSlices({ isOpen, onClose }) {
     );
 
     const handleOpenSlice = (id) => {
-        onClose(); // Закрыть модалку
-        navigate(`/slice/${id}`); // Перейти на страницу среза
+        onClose();
+        navigate(`/slice/${id}`);
     };
 
     if (!isOpen) return null;

@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import Navbar from "../../Components/Navbar";
 import sliceStyles from "./styles";
 
 const dummySlice = {
@@ -21,34 +22,38 @@ export default function Slice() {
     };
 
     return (
-        <div style={sliceStyles.container}>
-            <h2>{dummySlice.name}</h2>
-            <table style={sliceStyles.table}>
-                <thead>
-                <tr>
-                    {dummySlice.headers.map((header, index) => (
-                        <th key={index} style={sliceStyles.th}>{header}</th>
-                    ))}
-                </tr>
-                </thead>
-                <tbody>
-                {dummySlice.rows.map((row, rowIndex) => (
-                    <tr key={rowIndex}>
-                        {row.map((cell, cellIndex) => (
-                            <td key={cellIndex} style={sliceStyles.td}>{cell}</td>
+        <div style={sliceStyles.page}>
+            <Navbar />
+                <div style={sliceStyles.container}>
+                    
+                    <h2>{dummySlice.name}</h2>
+                    <table style={sliceStyles.table}>
+                        <thead>
+                        <tr>
+                            {dummySlice.headers.map((header, index) => (
+                                <th key={index} style={sliceStyles.th}>{header}</th>
+                            ))}
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {dummySlice.rows.map((row, rowIndex) => (
+                            <tr key={rowIndex}>
+                                {row.map((cell, cellIndex) => (
+                                    <td key={cellIndex} style={sliceStyles.td}>{cell}</td>
+                                ))}
+                            </tr>
                         ))}
-                    </tr>
-                ))}
-                </tbody>
-            </table>
-            <div style={sliceStyles.buttons}>
-                <button onClick={() => navigate("/slices")} style={sliceStyles.backButton}>
-                    Назад к срезам
-                </button>
-                <button onClick={handleDownload} style={sliceStyles.downloadButton}>
-                Скачать
-                </button>
-            </div>
+                        </tbody>
+                    </table>
+                    <div style={sliceStyles.buttons}>
+                        <button onClick={() => navigate("/slices")} style={sliceStyles.backButton}>
+                            Назад к срезам
+                        </button>
+                        <button onClick={handleDownload} style={sliceStyles.downloadButton}>
+                        Скачать
+                        </button>
+                    </div>
+                </div>
         </div>
     );
 }
