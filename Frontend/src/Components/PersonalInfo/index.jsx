@@ -11,7 +11,6 @@ export default function PersonalInfo({ organization, firstName, lastName, email,
 
     const toggleEdit = () => {
         if (editing) {
-            //добавить обработку запроса
             console.log("Сохраняем изменения:", formData);
         }
         setEditing(prev => !prev);
@@ -22,49 +21,57 @@ export default function PersonalInfo({ organization, firstName, lastName, email,
             <div style={styles.leftPanel}>
                 <h2>Личные данные</h2>
 
-                <div style={styles.field}><strong>Организация:</strong> {editing ? (
+                <div style={styles.field}>
+                    <strong>Организация:</strong> {editing ? (
                     <input
                         type="text"
                         value={formData.organization}
                         onChange={e => handleChange("organization", e.target.value)}
-                        style={{ marginLeft: "10px", padding: "5px" }}
+                        style={styles.input}
                     />
                 ) : (
-                    <span style={{ marginLeft: "10px" }}>{formData.organization}</span>
-                )}</div>
+                    <span style={styles.span}>{formData.organization}</span>
+                )}
+                </div>
 
-                <div style={styles.field}><strong>Имя:</strong> {editing ? (
+                <div style={styles.field}>
+                    <strong>Имя:</strong> {editing ? (
                     <input
                         type="text"
                         value={formData.firstName}
                         onChange={e => handleChange("firstName", e.target.value)}
-                        style={{ marginLeft: "10px", padding: "5px" }}
+                        style={styles.input}
                     />
                 ) : (
-                    <span style={{ marginLeft: "10px" }}>{formData.firstName}</span>
-                )}</div>
+                    <span style={styles.span}>{formData.firstName}</span>
+                )}
+                </div>
 
-                <div style={styles.field}><strong>Фамилия:</strong> {editing ? (
+                <div style={styles.field}>
+                    <strong>Фамилия:</strong> {editing ? (
                     <input
                         type="text"
                         value={formData.lastName}
                         onChange={e => handleChange("lastName", e.target.value)}
-                        style={{ marginLeft: "10px", padding: "5px" }}
+                        style={styles.input}
                     />
                 ) : (
-                    <span style={{ marginLeft: "10px" }}>{formData.lastName}</span>
-                )}</div>
+                    <span style={styles.span}>{formData.lastName}</span>
+                )}
+                </div>
 
-                <div style={styles.field}><strong>Почта:</strong> {editing ? (
+                <div style={styles.field}>
+                    <strong>Почта:</strong> {editing ? (
                     <input
                         type="email"
                         value={formData.email}
                         onChange={e => handleChange("email", e.target.value)}
-                        style={{ marginLeft: "10px", padding: "5px" }}
+                        style={styles.input}
                     />
                 ) : (
-                    <span style={{ marginLeft: "10px" }}>{formData.email}</span>
-                )}</div>
+                    <span style={styles.span}>{formData.email}</span>
+                )}
+                </div>
 
                 <div style={styles.buttonRow}>
                     <button style={styles.actionButton} onClick={onChangePassword}>Сменить пароль</button>

@@ -3,7 +3,7 @@ import styles from "./styles";
 import OpenSlices from "../../Modals/OpenSlices";
 import CreateSliceModal from "../../Modals/CreateSlice";
 
-export default function RegistryActions() {
+export default function RegistryActions({ fileFormat }) {
     const [hovered, setHovered] = useState(null);
     const [isSlicesOpen, setIsSlicesOpen] = useState(false);
     const [isCreateSliceOpen, setIsCreateSliceOpen] = useState(false);
@@ -48,6 +48,7 @@ export default function RegistryActions() {
                 isOpen={isCreateSliceOpen}
                 onClose={() => setIsCreateSliceOpen(false)}
                 headers={dummyHeaders}
+                fileFormat={fileFormat}
             />
         </>
     );

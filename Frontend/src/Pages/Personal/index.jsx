@@ -21,10 +21,10 @@ export default function PersonalPage() {
             <Navbar />
             <div style={styles.contentWrapper}>
                 <PersonalInfo
-                    organization="[Организация]"
-                    firstName="[Имя]"
-                    lastName="[Фамилия]"
-                    email="email@example.com"
+                    organization=""
+                    firstName=""
+                    lastName=""
+                    email=""
                     onChangePassword={handleChangePassword}
                     onLogout={handleLogout}
                 />

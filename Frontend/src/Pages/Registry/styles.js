@@ -3,6 +3,7 @@ const styles = {
         display: "flex",
         flexDirection: "column",
         height: "100vh",
+        fontFamily: "Consolas",
     },
     container: {
         flex: 1,
