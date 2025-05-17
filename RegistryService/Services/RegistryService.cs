@@ -42,6 +42,26 @@ namespace RegistryServiceProject.Services
                 .ToListAsync();
         }
 
+        public async Task<List<Registry>> GetUserCreatedRegistriesWithAccessLevel2Or3Async(int userId)
+        {
+            return await _db.Registries
+                .Where(r => r.CreatedByUserId == userId &&
+                            (r.DefaultAccessLevel == AccessLevel.Requestable || r.DefaultAccessLevel == AccessLevel.InternalOrganization))
+                .Include(r => r.Meta)
+                .ToListAsync();
+        }
+
+        public async Task<List<string>> GetUsernamesWithAccessToRegistryAsync(int registryId)
+        {
+            var usernames = await _db.UserRegistryAccesses
+                .Where(a => a.RegistryId == registryId && a.IsApproved)
+                .Include(a => a.User)
+                .Select(a => a.User.Username)
+                .ToListAsync();
+
+            return usernames;
+        }
+
         public async Task<Registry?> GetRegistryWithMetaByIdAsync(int id)
         {
             return await _db.Registries
@@ -73,28 +93,6 @@ namespace RegistryServiceProject.Services
 
             return allowed ? registry : null;
         }
-
-        //public async Task<List<object>> GetAvailableRegistryListForUserAsync(int userId)
-        //{
-        //    var publicRegistries = await _db.Registries
-        //        .Where(r => r.DefaultAccessLevel == AccessLevel.Public)
-        //        .Select(r => new { r.Id, r.Name })
-        //        .ToListAsync();
-
-        //    var userRegistries = await _db.UserRegistryAccesses
-        //        .Include(ua => ua.Registry)
-        //        .Where(ua => ua.UserId == userId && ua.IsApproved)
-        //        .Select(ua => new { ua.Registry.Id, ua.Registry.Name })
-        //        .ToListAsync();
-
-        //    var result = publicRegistries
-        //        .Concat(userRegistries)
-        //        .GroupBy(r => r.Id)
-        //        .Select(g => g.First())
-        //        .ToList<object>();
-
-        //    return result;
-        //}
 
         public async Task<List<object>> GetAvailableRegistryListForUserAsync(int userId)
         {
@@ -194,5 +192,60 @@ namespace RegistryServiceProject.Services
 
             return registry.Id;
         }
+
+        //Выдача доступа к реестру по узернейму
+        public async Task<bool> GrantAccessToUserByUsernameAsync(int registryId, string username)
+        {
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.Username == username);
+            if (user == null)
+                return false;
+
+            var registry = await _db.Registries.FirstOrDefaultAsync(r => r.Id == registryId);
+            if (registry == null)
+                return false;
+
+            if (registry.DefaultAccessLevel != AccessLevel.Requestable &&
+                registry.DefaultAccessLevel != AccessLevel.InternalOrganization)
+                return false; // нельзя выдавать доступ к публичному реестру
+
+            // Проверка: не дублируем доступ
+            var exists = await _db.UserRegistryAccesses
+                .AnyAsync(a => a.UserId == user.Id && a.RegistryId == registryId);
+
+            if (exists)
+                return false;
+
+            var access = new UserRegistryAccess
+            {
+                UserId = user.Id,
+                RegistryId = registry.Id,
+                AccessLevel = registry.DefaultAccessLevel, // 2 или 3
+                IsApproved = true,
+                GrantedAt = DateTime.UtcNow
+            };
+
+            _db.UserRegistryAccesses.Add(access);
+            await _db.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> RevokeAccessFromUserByUsernameAsync(int registryId, string username)
+        {
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.Username == username);
+            if (user == null)
+                return false;
+
+            var access = await _db.UserRegistryAccesses
+                .FirstOrDefaultAsync(a => a.UserId == user.Id && a.RegistryId == registryId);
+
+            if (access == null)
+                return false;
+
+            _db.UserRegistryAccesses.Remove(access);
+            await _db.SaveChangesAsync();
+            return true;
+        }
+        
+
     }
 }

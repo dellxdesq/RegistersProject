@@ -1,4 +1,5 @@
 ﻿using RegistryService.Models;
+using System.Text.Json.Serialization;
 
 namespace RegistryService.Models
 {//метаданные реестра
@@ -7,6 +8,7 @@ namespace RegistryService.Models
         public int Id { get; set; }
 
         public int RegistryId { get; set; }
+        [JsonIgnore]
         public Registry Registry { get; set; }
 
         public string FileFormat { get; set; } = string.Empty;

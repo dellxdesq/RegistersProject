@@ -18,6 +18,7 @@ namespace RegistryServiceProject.Controllers
             _registryService = registryService ?? throw new ArgumentNullException(nameof(registryService));
         }
 
+        //все реестры кроме тех к которым не дали доступ
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -29,7 +30,8 @@ namespace RegistryServiceProject.Controllers
             return Ok(registries);
         }
 
-        [HttpGet("uploaded-list")]
+        //список загруженных
+        [HttpGet("list/uploaded")]
         public async Task<IActionResult> GetUploadedRegistries()
         {
             var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -50,6 +52,46 @@ namespace RegistryServiceProject.Controllers
 
             var registryId = await _registryService.AddRegistryAsync(request, userId);
             return Ok(new { RegistryId = registryId });
+        }
+
+        //получить список реестров 2-3 уровня доступа созданных текущим пользователем 
+        [HttpGet("list/uploaded/acces-level/2-3")]
+        public async Task<IActionResult> GetAccessibleRegistriesLevel2Or3()
+        {
+            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(userIdStr, out var userId))
+                return Unauthorized();
+
+            var registries = await _registryService.GetUserCreatedRegistriesWithAccessLevel2Or3Async(userId);
+            return Ok(registries);
+        }
+
+        //получение узернеймов пользователей которым дали доступ к реестру
+        [HttpGet("{id}/users/usernames")]
+        public async Task<ActionResult<List<string>>> GetUsernamesWithAccessToRegistryAsync(int id)
+        {
+            var usernames = await _registryService.GetUsernamesWithAccessToRegistryAsync(id);
+            return Ok(usernames);
+        }
+
+        //Выдача доступа к реестру по узернейму
+        [HttpPost("{id}/users/access")]
+        public async Task<IActionResult> GrantAccessToUserAsync(int id, [FromBody] GrantAccessRequest request)
+        {
+            var success = await _registryService.GrantAccessToUserByUsernameAsync(id, request.Username);
+            if (!success)
+                return BadRequest("Пользователь не найден или уже имеет доступ.");
+            return Ok("Доступ выдан.");
+        }
+
+        //удаляет доступ по username
+        [HttpDelete("{id}/users/access")]
+        public async Task<IActionResult> RevokeAccessFromUserAsync(int id, [FromBody] GrantAccessRequest request)
+        {
+            var success = await _registryService.RevokeAccessFromUserByUsernameAsync(id, request.Username);
+            if (!success)
+                return BadRequest("Пользователь не найден.");
+            return Ok("Доступ удалён.");
         }
 
         // Получить конкретный реестр с метаданными
@@ -81,6 +123,7 @@ namespace RegistryServiceProject.Controllers
             });
         }
 
+        //получить все реестры по id юзера
         [HttpGet("user/{id}")]
         public async Task<IActionResult> GetUserRegistryList(int id)
         {
@@ -88,6 +131,7 @@ namespace RegistryServiceProject.Controllers
             return Ok(registries);
         }
 
+        //получить все usernames(1000 шт пока)
         [HttpGet("users/logins")]
         public async Task<IActionResult> GetUsernames()
         {
@@ -96,6 +140,7 @@ namespace RegistryServiceProject.Controllers
             return Ok(usernames);
         }
 
+        //скачивание файла по id реестра
         [HttpGet("{id}/download")]
         public async Task<IActionResult> Download(int id)
         {
