@@ -1,7 +1,7 @@
 ﻿using RegistryService.Models;
 using RegistryService.Models.Enums;
 
-namespace RegistryServiceProject.Models
+namespace RegistryService.Models
 {//Модель реестра
     public class Registry
     {
@@ -10,5 +10,6 @@ namespace RegistryServiceProject.Models
         public required string Description { get; set; }
         public RegistryMeta? Meta { get; set; }
         public AccessLevel DefaultAccessLevel { get; set; }
+        public int CreatedByUserId { get; set; }
     }
 }

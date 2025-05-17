@@ -1,6 +1,5 @@
-﻿using AuthService.Models;
-using RegistryService.Models.Enums;
-using RegistryServiceProject.Models;
+﻿using RegistryService.Models.Enums;
+using RegistryService.Models;
 
 namespace RegistryService.Models
 {//таблица связей пользователей и реестров

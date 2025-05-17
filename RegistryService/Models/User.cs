@@ -1,4 +1,4 @@
-﻿namespace AuthService.Models
+﻿namespace RegistryService.Models
 {
     public class User
     {

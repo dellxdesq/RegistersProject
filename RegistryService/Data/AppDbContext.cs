@@ -7,6 +7,7 @@ namespace RegistryServiceProject.Data
 {
     public class AppDbContext : DbContext
     {
+        public DbSet<User> Users { get; set; }
         public DbSet<Registry> Registries { get; set; }
         public DbSet<UserRegistryAccess> UserRegistryAccesses { get; set; }
         public DbSet<RegistryMeta> RegistryMetas { get; set; }

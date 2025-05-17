@@ -1,4 +1,4 @@
-﻿using RegistryServiceProject.Models;
+﻿using RegistryService.Models;
 
 namespace RegistryService.Models
 {//метаданные реестра

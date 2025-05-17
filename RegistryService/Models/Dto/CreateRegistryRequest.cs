@@ -11,5 +11,7 @@ namespace RegistryServiceProject.Models.Dto
         public int RowsCount { get; set; }
         public AccessLevel DefaultAccessLevel { get; set; }
         public string FileName { get; set; } = string.Empty;
+
+        public List<string>? UserLoginsWithAccess { get; set; }
     }
 }

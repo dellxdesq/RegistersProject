@@ -21,7 +21,22 @@ namespace RegistryServiceProject.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var registries = await _registryService.GetRegistriesAsync();
+            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdStr == null || !int.TryParse(userIdStr, out var userId))
+                return Unauthorized();
+
+            var registries = await _registryService.GetRegistriesAsync(userId);
+            return Ok(registries);
+        }
+
+        [HttpGet("uploaded-list")]
+        public async Task<IActionResult> GetUploadedRegistries()
+        {
+            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdStr == null || !int.TryParse(userIdStr, out var userId))
+                return Unauthorized();
+
+            var registries = await _registryService.GetRegistriesCreatedByUserAsync(userId);
             return Ok(registries);
         }
 
@@ -71,6 +86,14 @@ namespace RegistryServiceProject.Controllers
         {
             var registries = await _registryService.GetAvailableRegistryListForUserAsync(id);
             return Ok(registries);
+        }
+
+        [HttpGet("users/logins")]
+        public async Task<IActionResult> GetUsernames()
+        {
+            var usernames = await _registryService.GetUsernamesAsync();
+
+            return Ok(usernames);
         }
 
         [HttpGet("{id}/download")]

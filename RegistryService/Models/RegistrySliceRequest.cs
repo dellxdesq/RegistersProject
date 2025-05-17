@@ -1,5 +1,4 @@
-﻿using AuthService.Models;
-using RegistryServiceProject.Models;
+﻿using RegistryService.Models;
 
 namespace RegistryService.Models
 {
@@ -8,7 +7,7 @@ namespace RegistryService.Models
         public int Id { get; set; }
 
         public int UserId { get; set; }
-        public User User { get; set; }
+        public User Users { get; set; }
 
         public int RegistryId { get; set; }
         public Registry Registry { get; set; }
