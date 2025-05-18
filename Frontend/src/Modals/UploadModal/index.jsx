@@ -58,12 +58,14 @@ export default function UploadModal({ isOpen, onClose }) {
                 rowsCount: Number(rowsCount),
                 defaultAccessLevel: accessLevel,
                 fileName: uploadResult.name,
-                users: selectedUsers,
+                userLoginsWithAccess: selectedUsers,
             };
 
             await addRegistry(requestBody, token);
             alert('Реестр успешно загружен!');
+            console.log(selectedUsers);
             onClose();
+            
         } catch (error) {
             alert(error.message || 'Ошибка загрузки реестра');
         }
@@ -148,33 +150,39 @@ export default function UploadModal({ isOpen, onClose }) {
                             /> Доступ внутри организации
                         </label>
                     </div>
-                    <label>
-                        Выбрать людей:
-                        <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
-                            <input
-                                type="text"
-                                value={currentUserInput}
-                                onChange={e => setCurrentUserInput(e.target.value)}
-                                style={{ ...styles.input, flex: 1 }}
-                            />
-                            <button type="button" onClick={handleAddUser} style={styles.addButton}>
-                                Добавить
-                            </button>
-                        </div>
-                    </label>
-
-                    {selectedUsers.length > 0 && (
-                        <div style={styles.userList}>
-                            {selectedUsers.map((user, index) => (
-                                <div key={index} style={styles.userItem}>
-                                    <span>{user}</span>
-                                    <button type="button" onClick={() => handleRemoveUser(user)} style={styles.removeButton}>
-                                        ✕
+                    {(accessLevel === 3) && (
+                        <>
+                            <label>
+                                Выбрать людей:
+                                <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
+                                    <input
+                                        type="text"
+                                        value={currentUserInput}
+                                        onChange={e => setCurrentUserInput(e.target.value)}
+                                        style={{ ...styles.input, flex: 1 }}
+                                    />
+                                    <button type="button" onClick={handleAddUser} style={styles.addButton}>
+                                        Добавить
                                     </button>
                                 </div>
-                            ))}
-                        </div>
+                            </label>
+
+                            {selectedUsers.length > 0 && (
+                                <div style={styles.userList}>
+                                    {selectedUsers.map((user, index) => (
+                                        <div key={index} style={styles.userItem}>
+                                            <span>{user}</span>
+                                            <button type="button" onClick={() => handleRemoveUser(user)} style={styles.removeButton}>
+                                                ✕
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </>
                     )}
+
+                    
 
                     <div style={styles.buttons}>
                         <button type="submit" style={styles.upload}>Загрузить</button>

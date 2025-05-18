@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import {useState, useEffect, use} from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Navbar from "../../Components/Navbar";
 import SearchList from "../../Components/SearchList";
@@ -8,6 +8,8 @@ import { validateToken } from "../../Api/validateAuth";
 import { fetchRegistries } from "../../Api/getRegistry";
 import { fetchUserRegistries } from "../../Api/getAvailableRegistries";
 import { getUploadedRegistries } from "../../Api/getUploadedRegistries";
+import { parseJwt } from "../../Utils/parseJwt";
+
 import styles from "./styles";
 
 export default function MainPage() {
@@ -26,21 +28,27 @@ export default function MainPage() {
         }
     }, [location.state]);
 
+    
+
     useEffect(() => {
         async function loadRegistries() {
             try {
-                const userData = JSON.parse(localStorage.getItem("user_data"));
-                const token = localStorage.getItem("token");
+                const token = localStorage.getItem("access_token");
+                const tokenPayload = parseJwt(token);
+                
+                const userId = tokenPayload?.["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"];
 
-                if (!token) {
-                    console.error("Пользователь не авторизован");
+                if (!token || !userId) {
+                    console.error("Не удалось извлечь userId или токен");
                     return;
                 }
 
                 let data = [];
 
                 if (mode === "available") {
-                    data = await fetchUserRegistries(userData.id, token);
+                    console.log("hui")
+                    data = await fetchUserRegistries(userId);
+                    console.log(userId);
                 } else if (mode === "uploaded") {
                     const result = await getUploadedRegistries();
                     if (result.success) {
@@ -52,6 +60,7 @@ export default function MainPage() {
                     data = await fetchRegistries();
                 }
 
+                console.log("Полученные реестры:", data);
                 setRegistries(data);
             } catch (error) {
                 console.error("Ошибка загрузки реестров:", error);
@@ -59,22 +68,24 @@ export default function MainPage() {
                 setLoading(false);
             }
         }
+
         loadRegistries();
     }, [mode]);
 
-    
+
     const getDataByMode = () => {
         switch (mode) {
             case "uploaded":
-                return registries.filter(r => r.defaultAccessLevel === 2 || 1 || 3);
+                return registries.filter(r => r.defaultAccessLevel === 1 || r.defaultAccessLevel === 2 || r.defaultAccessLevel === 3);
             case "available":
-                return registries.filter(r => r.defaultAccessLevel === 3);
+                return registries;
             case "all":
             default:
                 return registries;
         }
     };
-    
+
+
     const filteredList = getDataByMode().filter(item =>
         item.name.toLowerCase().includes(search.toLowerCase())
     );

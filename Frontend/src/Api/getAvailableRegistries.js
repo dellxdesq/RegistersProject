@@ -1,5 +1,6 @@
-import { getAuthHeaders } from "../Utils/getAuthHeaders"
-export async function fetchUserRegistries(userId, token) {
+import { getAuthHeaders } from "../Utils/getAuthHeaders";
+
+export async function fetchUserRegistries(userId) {
     const url = `https://localhost:8081/api/v1/registries/user/${userId}`;
 
     try {
