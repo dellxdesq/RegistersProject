@@ -44,24 +44,33 @@ namespace AuthService.Services
             return new AuthResult(true, CreateToken(user));
         }
 
-        public record AuthResult(bool Success, string Token = null, string Error = null);
+        public record AuthResult(bool Success, string Token = null, string Error = null, string RefreshToken = null);
 
-        public async Task<string> Login(string username, string password)
+        public async Task<AuthResult> Login(string username, string password)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
             if (user == null || !VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
-                return null;
+                return new AuthResult(false, Error: "Invalid credentials");
 
-            return CreateToken(user);
+            var accessToken = CreateToken(user);
+            var refreshToken = GenerateRefreshToken();
+
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpiry = DateTime.UtcNow.AddDays(7);
+
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+
+            return new AuthResult(true, accessToken, RefreshToken: refreshToken);
         }
 
         private string CreateToken(User user)
         {
             var claims = new List<Claim>
-        {
+            {
             new Claim(ClaimTypes.Name, user.Username),
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
-        };
+            };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
@@ -75,6 +84,32 @@ namespace AuthService.Services
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        private string GenerateRefreshToken()
+        {
+            var randomBytes = new byte[64];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(randomBytes);
+            return Convert.ToBase64String(randomBytes);
+        }
+
+        public async Task<AuthResult> RefreshAccessToken(string refreshToken)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
+
+            if (user == null || user.RefreshTokenExpiry < DateTime.UtcNow)
+                return new AuthResult(false, Error: "Invalid or expired refresh token");
+
+            var newAccessToken = CreateToken(user);
+            var newRefreshToken = GenerateRefreshToken();
+
+            user.RefreshToken = newRefreshToken;
+            user.RefreshTokenExpiry = DateTime.UtcNow.AddDays(7);
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+
+            return new AuthResult(true, newAccessToken, RefreshToken: newRefreshToken);
         }
 
         private void CreatePasswordHash(string password, out byte[] hash, out byte[] salt)
@@ -162,6 +197,18 @@ namespace AuthService.Services
             await _context.SaveChangesAsync();
 
             return (true, null);
+        }
+
+        public async Task LogoutAsync(int userId)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null) return;
+
+            user.RefreshToken = null;
+            user.RefreshTokenExpiry = DateTime.Now;//null
+
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
         }
     }
 }

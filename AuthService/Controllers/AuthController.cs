@@ -36,14 +36,40 @@ namespace AuthService.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDto request)
         {
-            var token = await _authService.Login(
-                request.Username,
-                request.Password
-            );
+            var result = await _authService.Login(request.Username, request.Password);
 
-            return token == null
-                ? Unauthorized()
-                : Ok(new { Token = token });
+            if (!result.Success)
+                return Unauthorized(new { error = result.Error });
+
+            return Ok(new
+            {
+                accessToken = result.Token,
+                refreshToken = result.RefreshToken
+            });
+        }
+
+        [HttpPost("refresh")]
+        public async Task<IActionResult> Refresh(RefreshTokenDto request)
+        {
+            var result = await _authService.RefreshAccessToken(request.RefreshToken);
+
+            if (!result.Success)
+                return Unauthorized(new { error = result.Error });
+
+            return Ok(new
+            {
+                accessToken = result.Token,
+                refreshToken = result.RefreshToken
+            });
+        }
+
+        [Authorize]
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value!);
+            await _authService.LogoutAsync(userId);
+            return Ok(new { message = "Logged out successfully" });
         }
 
         [HttpGet("validate")]
