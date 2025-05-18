@@ -1,4 +1,6 @@
-﻿using AuthService.Services;
+﻿using AuthService.Models.Dto;
+using AuthService.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -73,6 +75,33 @@ namespace AuthService.Controllers
             {
                 return StatusCode(500, new { Error = ex.Message });
             }
+        }
+
+        [Authorize]
+        [HttpGet("profile")]
+        public async Task<IActionResult> GetProfile()
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value!);
+            var profile = await _authService.GetUserProfileAsync(userId);
+            return profile == null ? NotFound() : Ok(profile);
+        }
+
+        [Authorize]
+        [HttpPut("profile")]
+        public async Task<IActionResult> UpdateProfile(UpdateUserDto dto)
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value!);
+            var result = await _authService.UpdateUserProfileAsync(userId, dto);
+            return result ? Ok() : NotFound();
+        }
+
+        [Authorize]
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword(ChangePasswordDto dto)
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value!);
+            var (success, error) = await _authService.ChangePasswordAsync(userId, dto.CurrentPassword, dto.NewPassword);
+            return success ? Ok() : BadRequest(error);
         }
     }
 

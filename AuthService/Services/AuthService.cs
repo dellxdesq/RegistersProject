@@ -1,5 +1,6 @@
 ﻿using AuthService.Data;
 using AuthService.Models;
+using AuthService.Models.Dto;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -114,6 +115,53 @@ namespace AuthService.Services
             {
                 return false;
             }
+        }
+
+        //Действия с учёткой
+        public async Task<UserDto?> GetUserProfileAsync(int userId)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            return user == null ? null : new UserDto(
+                user.Id, user.Username, user.Email,
+                user.FirstName, user.LastName, user.Organization
+            );
+        }
+
+        public async Task<bool> UpdateUserProfileAsync(int userId, UpdateUserDto dto)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null) return false;
+
+            user.Email = dto.Email;
+            user.FirstName = dto.FirstName;
+            user.LastName = dto.LastName;
+            user.Organization = dto.Organization;
+
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<(bool Success, string Error)> ChangePasswordAsync(int userId, string currentPassword, string newPassword)
+        {
+            if (newPassword.Length < 6)
+                return (false, "New password must be at least 6 characters");
+
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+                return (false, "User not found");
+
+            if (!VerifyPasswordHash(currentPassword, user.PasswordHash, user.PasswordSalt))
+                return (false, "Incorrect current password");
+
+            CreatePasswordHash(newPassword, out var newHash, out var newSalt);
+            user.PasswordHash = newHash;
+            user.PasswordSalt = newSalt;
+
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+
+            return (true, null);
         }
     }
 }
