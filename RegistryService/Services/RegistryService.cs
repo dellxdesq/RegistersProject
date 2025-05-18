@@ -16,23 +16,34 @@ namespace RegistryServiceProject.Services
             _db = db;
         }
 
-        public async Task<List<Registry>> GetRegistriesAsync(int userId)
+        public async Task<List<Registry>> GetRegistriesAsync(int? userId)
         {
-            var allowedRegistryIds = await _db.UserRegistryAccesses
-                .Where(a => a.UserId == userId && a.IsApproved)
-                .Select(a => a.RegistryId)
-                .ToListAsync();
+            var registriesQuery = _db.Registries.AsQueryable();
 
-            var registries = await _db.Registries
-                .Where(r =>
-                    r.DefaultAccessLevel == AccessLevel.Public ||
-                    r.DefaultAccessLevel == AccessLevel.Requestable ||
-                    (r.DefaultAccessLevel == AccessLevel.InternalOrganization &&
-                     allowedRegistryIds.Contains(r.Id))
-                )
-                .ToListAsync();
+            if (userId == null)
+            {
+                // Гость: только публичные и по запросу
+                registriesQuery = registriesQuery
+                    .Where(r => r.DefaultAccessLevel == AccessLevel.Public ||
+                                r.DefaultAccessLevel == AccessLevel.Requestable);
+            }
+            else
+            {
+                // Авторизованный: 1 и 2 уровень + 3 если есть доступ
+                var allowedRegistryIds = await _db.UserRegistryAccesses
+                    .Where(a => a.UserId == userId && a.IsApproved)
+                    .Select(a => a.RegistryId)
+                    .ToListAsync();
 
-            return registries;
+                registriesQuery = registriesQuery
+                    .Where(r =>
+                        r.DefaultAccessLevel == AccessLevel.Public ||
+                        r.DefaultAccessLevel == AccessLevel.Requestable ||
+                        (r.DefaultAccessLevel == AccessLevel.InternalOrganization &&
+                         allowedRegistryIds.Contains(r.Id)));
+            }
+
+            return await registriesQuery.ToListAsync();
         }
 
         public async Task<List<Registry>> GetRegistriesCreatedByUserAsync(int userId)
@@ -94,32 +105,19 @@ namespace RegistryServiceProject.Services
             return allowed ? registry : null;
         }
 
-        public async Task<List<object>> GetAvailableRegistryListForUserAsync(int userId)
+        public async Task<List<RegistryDto>> GetAvailableRegistryListForUserAsync(int userId)
         {
-            // 1. Публичные реестры, созданные НЕ этим пользователем
-            var publicRegistries = await _db.Registries
-                .Where(r => r.DefaultAccessLevel == AccessLevel.Public && r.CreatedByUserId != userId)
-                .Select(r => new { r.Id, r.Name })
-                .ToListAsync();
-
-            // 2. Реестры, к которым у пользователя есть одобренный доступ, и которые он НЕ создавал
             var approvedUserRegistries = await _db.UserRegistryAccesses
-                .Include(ua => ua.Registry)
                 .Where(ua => ua.UserId == userId &&
                              ua.IsApproved &&
                              ua.Registry.CreatedByUserId != userId)
-                .Select(ua => new { ua.Registry.Id, ua.Registry.Name })
+                .Select(ua => new RegistryDto(ua.Registry.Id, ua.Registry.Name))
                 .ToListAsync();
 
-            // 3. Объединение и исключение дубликатов по Id
-            var result = publicRegistries
-                .Concat(approvedUserRegistries)
-                .GroupBy(r => r.Id)
-                .Select(g => g.First())
-                .ToList<object>();
-
-            return result;
+            return approvedUserRegistries;
         }
+
+        public record RegistryDto(int Id, string Name);
 
         public async Task<List<string>> GetUsernamesAsync()
         {

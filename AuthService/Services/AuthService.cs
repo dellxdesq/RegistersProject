@@ -205,7 +205,7 @@ namespace AuthService.Services
             if (user == null) return;
 
             user.RefreshToken = null;
-            user.RefreshTokenExpiry = DateTime.Now;//null
+            user.RefreshTokenExpiry = null;
 
             _context.Users.Update(user);
             await _context.SaveChangesAsync();

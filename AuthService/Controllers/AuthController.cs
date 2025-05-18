@@ -43,7 +43,7 @@ namespace AuthService.Controllers
 
             return Ok(new
             {
-                accessToken = result.Token,
+                token = result.Token,
                 refreshToken = result.RefreshToken
             });
         }

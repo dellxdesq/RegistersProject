@@ -8,7 +8,6 @@ namespace RegistryServiceProject.Controllers
 {
     [ApiController]
     [Route("/api/v1/registries")]
-    [Authorize]
     public class RegistryController : ControllerBase
     {
         private readonly Services.RegistryService _registryService;
@@ -22,15 +21,17 @@ namespace RegistryServiceProject.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
+            int? userId = null;
             var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userIdStr == null || !int.TryParse(userIdStr, out var userId))
-                return Unauthorized();
+            if (int.TryParse(userIdStr, out var parsedId))
+                userId = parsedId;
 
             var registries = await _registryService.GetRegistriesAsync(userId);
             return Ok(registries);
         }
 
         //список загруженных
+        [Authorize]
         [HttpGet("list/uploaded")]
         public async Task<IActionResult> GetUploadedRegistries()
         {
@@ -43,6 +44,7 @@ namespace RegistryServiceProject.Controllers
         }
 
         //Добавление реестра, метаданных и доступов
+        [Authorize]
         [HttpPost("add")]
         public async Task<IActionResult> AddRegistry([FromBody] CreateRegistryRequest request)
         {
@@ -55,6 +57,7 @@ namespace RegistryServiceProject.Controllers
         }
 
         //получить список реестров 2-3 уровня доступа созданных текущим пользователем 
+        [Authorize]
         [HttpGet("list/uploaded/acces-level/2-3")]
         public async Task<IActionResult> GetAccessibleRegistriesLevel2Or3()
         {
@@ -67,6 +70,7 @@ namespace RegistryServiceProject.Controllers
         }
 
         //получение узернеймов пользователей которым дали доступ к реестру
+        [Authorize]
         [HttpGet("{id}/users/usernames")]
         public async Task<ActionResult<List<string>>> GetUsernamesWithAccessToRegistryAsync(int id)
         {
@@ -75,6 +79,7 @@ namespace RegistryServiceProject.Controllers
         }
 
         //Выдача доступа к реестру по узернейму
+        [Authorize]
         [HttpPost("{id}/users/access")]
         public async Task<IActionResult> GrantAccessToUserAsync(int id, [FromBody] GrantAccessRequest request)
         {
@@ -85,6 +90,7 @@ namespace RegistryServiceProject.Controllers
         }
 
         //удаляет доступ по username
+        [Authorize]
         [HttpDelete("{id}/users/access")]
         public async Task<IActionResult> RevokeAccessFromUserAsync(int id, [FromBody] GrantAccessRequest request)
         {
@@ -124,6 +130,7 @@ namespace RegistryServiceProject.Controllers
         }
 
         //получить все реестры по id юзера
+        [Authorize]
         [HttpGet("user/{id}")]
         public async Task<IActionResult> GetUserRegistryList(int id)
         {
@@ -132,6 +139,7 @@ namespace RegistryServiceProject.Controllers
         }
 
         //получить все usernames(1000 шт пока)
+        [Authorize]
         [HttpGet("users/logins")]
         public async Task<IActionResult> GetUsernames()
         {
@@ -141,6 +149,7 @@ namespace RegistryServiceProject.Controllers
         }
 
         //скачивание файла по id реестра
+        [Authorize]
         [HttpGet("{id}/download")]
         public async Task<IActionResult> Download(int id)
         {
