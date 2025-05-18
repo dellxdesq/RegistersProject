@@ -7,7 +7,6 @@ export async function uploadRegistryFile(file, token) {
             method: "POST",
             headers: {
                 Authorization: `Bearer ${token}`
-
             },
             body: formData,
         });

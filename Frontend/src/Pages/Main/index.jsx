@@ -7,6 +7,7 @@ import UploadModal from "../../Modals/UploadModal";
 import { validateToken } from "../../Api/validateAuth";
 import { fetchRegistries } from "../../Api/getRegistry";
 import { fetchUserRegistries } from "../../Api/getAvailableRegistries";
+import { getUploadedRegistries } from "../../Api/getUploadedRegistries";
 import styles from "./styles";
 
 export default function MainPage() {
@@ -40,6 +41,13 @@ export default function MainPage() {
 
                 if (mode === "available") {
                     data = await fetchUserRegistries(userData.id, token);
+                } else if (mode === "uploaded") {
+                    const result = await getUploadedRegistries();
+                    if (result.success) {
+                        data = result.data;
+                    } else {
+                        console.error("Ошибка при получении загруженных реестров:", result.error);
+                    }
                 } else {
                     data = await fetchRegistries();
                 }
@@ -51,32 +59,16 @@ export default function MainPage() {
                 setLoading(false);
             }
         }
-
         loadRegistries();
-    }, [mode]); // добавили зависимость от mode
+    }, [mode]);
 
-
-    useEffect(() => {
-        async function loadRegistries() {
-            try {
-                const data = await fetchRegistries();
-                setRegistries(data);
-            } catch (error) {
-                console.error("Ошибка загрузки реестров:", error);
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        loadRegistries();
-    }, []);
-
+    
     const getDataByMode = () => {
         switch (mode) {
             case "uploaded":
-                return registries.filter(r => r.defaultAccessLevel === 2);
+                return registries.filter(r => r.defaultAccessLevel === 2 || 1 || 3);
             case "available":
-                return registries.filter(r => r.defaultAccessLevel === 1);
+                return registries.filter(r => r.defaultAccessLevel === 3);
             case "all":
             default:
                 return registries;

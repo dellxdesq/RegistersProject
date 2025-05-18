@@ -17,15 +17,18 @@ export async function loginUser({ username, password }) {
                 try {
                     errorText = await response.text();
                 } catch {
-                    
                 }
             }
 
             return { success: false, error: errorText };
         }
 
-        const data = await response.json();
-        return { success: true, data };
+        const { token, refreshToken } = await response.json();
+        
+        localStorage.setItem("access_token", token);
+        localStorage.setItem("refresh_token", refreshToken);
+
+        return { success: true, data: { token, refreshToken } };
     } catch (err) {
         console.error("Ошибка при логине:", err);
         return { success: false, error: "Ошибка подключения к серверу" };

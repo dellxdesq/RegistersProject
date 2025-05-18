@@ -1,9 +1,8 @@
+import { getAuthHeaders } from "../Utils/getAuthHeaders"
 export async function fetchRegistryById(id) {
     const token = localStorage.getItem("token");
     const response = await fetch(`https://localhost:8081/api/v1/registries/${id}`, {
-        headers: {
-            "Authorization": `Bearer ${token}`,
-        },
+        headers: getAuthHeaders(),
     });
 
     if (response.status === 403) {

@@ -1,3 +1,5 @@
+import {getAuthHeaders} from "../Utils/getAuthHeaders";
+
 export async function validateToken() {
     const token = localStorage.getItem("token");
 
@@ -8,9 +10,7 @@ export async function validateToken() {
     try {
         const response = await fetch("https://localhost:8081/api/v1/auth/validate", {
             method: "GET",
-            headers: {
-                "Authorization": `Bearer ${token}`,
-            },
+            headers: getAuthHeaders(),
         });
 
         if (!response.ok) {

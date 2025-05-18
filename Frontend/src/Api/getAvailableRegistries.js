@@ -1,13 +1,11 @@
+import { getAuthHeaders } from "../Utils/getAuthHeaders"
 export async function fetchUserRegistries(userId, token) {
     const url = `https://localhost:8081/api/v1/registries/user/${userId}`;
 
     try {
         const response = await fetch(url, {
             method: "GET",
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json",
-            },
+            headers: getAuthHeaders()
         });
 
         if (!response.ok) {
