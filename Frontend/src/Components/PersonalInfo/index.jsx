@@ -1,17 +1,44 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "../PersonalInfo/styles";
+import { getProfile } from "../../Api/getUserProfileInfo";
+import { updateProfile } from "../../Api/changeUserProfile";
+import ChangePasswordModal from "../../Modals/ChangePassword"
 
-export default function PersonalInfo({ organization, firstName, lastName, email, onChangePassword, onLogout }) {
-    const [formData, setFormData] = useState({ organization, firstName, lastName, email });
+export default function PersonalInfo({ onChangePassword, onLogout }) {
+    const [formData, setFormData] = useState({
+        organization: "",
+        firstName: "",
+        lastName: "",
+        email: "",
+    });
     const [editing, setEditing] = useState(false);
+    const [showPasswordModal, setShowPasswordModal] = useState(false);
+    useEffect(() => {
+        getProfile().then(res => {
+            if (res.success) {
+                setFormData({
+                    organization: res.data.organization || "",
+                    firstName: res.data.firstName || "",
+                    lastName: res.data.lastName || "",
+                    email: res.data.email || "",
+                });
+            } else {
+                alert("Ошибка при загрузке профиля: " + res.error);
+            }
+        });
+    }, []);
 
     const handleChange = (field, value) => {
         setFormData(prev => ({ ...prev, [field]: value }));
     };
 
-    const toggleEdit = () => {
+    const toggleEdit = async () => {
         if (editing) {
-            console.log("Сохраняем изменения:", formData);
+            const res = await updateProfile(formData);
+            if (!res.success) {
+                alert("Ошибка при сохранении: " + res.error);
+                return;
+            }
         }
         setEditing(prev => !prev);
     };
@@ -74,7 +101,8 @@ export default function PersonalInfo({ organization, firstName, lastName, email,
                 </div>
 
                 <div style={styles.buttonRow}>
-                    <button style={styles.actionButton} onClick={onChangePassword}>Сменить пароль</button>
+                    <button style={styles.actionButton} onClick={() => setShowPasswordModal(true)}>Сменить пароль
+                    </button>
                     <button
                         style={{
                             ...styles.actionButton,
@@ -87,6 +115,14 @@ export default function PersonalInfo({ organization, firstName, lastName, email,
                     <button style={styles.logoutButton} onClick={onLogout}>Выход</button>
                 </div>
             </div>
+            {showPasswordModal && (
+                <div style={styles.overlay}>
+                    <ChangePasswordModal onClose={() => setShowPasswordModal(false)} />
+                </div>
+            )}
         </div>
+        
+        
+        
     );
 }
