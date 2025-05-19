@@ -10,13 +10,13 @@ export async function getUploadedAccessRegistries() {
         });
 
         if (!response.ok) {
-            throw new Error(`Ошибка при получении реестров: ${response.statusText}`);
+            throw new Error(`РћС€РёР±РєР° РїСЂРё РїРѕР»СѓС‡РµРЅРёРё СЂРµРµСЃС‚СЂРѕРІ: ${response.statusText}`);
         }
 
         const data = await response.json();
         return { success: true, data };
     } catch (error) {
-        console.error("Ошибка при запросе загруженных реестров с доступом 2 и 3:", error);
+        console.error("РћС€РёР±РєР° РїСЂРё Р·Р°РїСЂРѕСЃРµ Р·Р°РіСЂСѓР¶РµРЅРЅС‹С… СЂРµРµСЃС‚СЂРѕРІ СЃ РґРѕСЃС‚СѓРїРѕРј 2 Рё 3:", error);
         return { success: false, error: error.message };
     }
 }

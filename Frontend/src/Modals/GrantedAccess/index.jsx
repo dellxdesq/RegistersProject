@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { getUploadedAccessRegistries } from "../../Api/getAccessList";
 import { getUsersWithAccess } from "../../Api/getUsersWithAccess";
+import { grantAccessToUser } from "../../Api/grantAccessToUser";
+import { deleteUserAccess } from "../../Api/deleteUserAccess";
 
 
 import styles from "./styles";
@@ -55,17 +57,36 @@ export default function GrantedAccessModal({ isOpen, onClose }) {
         }
     };
 
-    const handleRemoveUser = (userId) => {
-        setUsers(prev => prev.filter(user => user.id !== userId));
-    };
+    const handleRemoveUser = async (userId) => {
+        const user = users.find(u => u.id === userId);
+        if (!user) return;
 
-    const handleAddUser = () => {
-        const email = prompt("Введите email пользователя:");
-        if (email) {
-            const newUser = { id: Date.now(), email };
-            setUsers(prev => [...prev, newUser]);
+        const confirmDelete = window.confirm(`Удалить доступ для ${user.email}?`);
+        if (!confirmDelete) return;
+
+        const result = await deleteUserAccess(selectedRegistry.id, user.email);
+        if (result.success) {
+            setUsers(prev => prev.filter(u => u.id !== userId));
+        } else {
+            alert("Ошибка при удалении доступа: " + result.error);
         }
     };
+
+
+    const handleAddUser = async () => {
+        const email = prompt("Введите email пользователя:");
+        if (!email) return;
+
+        const res = await grantAccessToUser(selectedRegistry.id, email);
+
+        if (res.success) {
+            const newUser = { id: Date.now(), email };
+            setUsers(prev => [...prev, newUser]);
+        } else {
+            alert("Ошибка при выдаче доступа: " + res.error);
+        }
+    };
+
 
     const handleBack = () => {
         setStep("list");

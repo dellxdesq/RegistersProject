@@ -10,13 +10,13 @@ export async function getUsersWithAccess(registryId) {
         });
 
         if (!response.ok) {
-            throw new Error(`Ошибка при получении пользователей: ${response.statusText}`);
+            throw new Error(`РћС€РёР±РєР° РїСЂРё РїРѕР»СѓС‡РµРЅРёРё РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№: ${response.statusText}`);
         }
 
         const data = await response.json();
         return { success: true, data };
     } catch (error) {
-        console.error("Ошибка при получении пользователей реестра:", error);
+        console.error("РћС€РёР±РєР° РїСЂРё РїРѕР»СѓС‡РµРЅРёРё РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№ СЂРµРµСЃС‚СЂР°:", error);
         return { success: false, error: error.message };
     }
 }
