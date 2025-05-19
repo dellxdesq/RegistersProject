@@ -46,7 +46,6 @@ export default function MainPage() {
                 let data = [];
 
                 if (mode === "available") {
-                    console.log("hui")
                     data = await fetchUserRegistries(userId);
                     console.log(userId);
                 } else if (mode === "uploaded") {
@@ -72,11 +71,11 @@ export default function MainPage() {
         loadRegistries();
     }, [mode]);
 
-
+    //тут это почистить вообще надо, но пока используется в filteredList, поэтому пусть будет
     const getDataByMode = () => {
         switch (mode) {
             case "uploaded":
-                return registries.filter(r => r.defaultAccessLevel === 1 || r.defaultAccessLevel === 2 || r.defaultAccessLevel === 3);
+                return registries;
             case "available":
                 return registries;
             case "all":
@@ -84,8 +83,7 @@ export default function MainPage() {
                 return registries;
         }
     };
-
-
+    
     const filteredList = getDataByMode().filter(item =>
         item.name.toLowerCase().includes(search.toLowerCase())
     );

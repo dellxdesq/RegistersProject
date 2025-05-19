@@ -1,4 +1,8 @@
 import { useState, useEffect } from "react";
+import { getUploadedAccessRegistries } from "../../Api/getAccessList";
+import { getUsersWithAccess } from "../../Api/getUsersWithAccess";
+
+
 import styles from "./styles";
 
 export default function GrantedAccessModal({ isOpen, onClose }) {
@@ -8,29 +12,47 @@ export default function GrantedAccessModal({ isOpen, onClose }) {
     const [selectedRegistry, setSelectedRegistry] = useState(null);
     const [users, setUsers] = useState([]);
 
-    const dummyRegistries = [
-        { id: 1, name: "Реестр недвижимости" },
-        { id: 2, name: "Реестр транспорта" },
-    ];
-
-    const dummyUsers = [
-        { id: 101, email: "ivan@example.com" },
-        { id: 102, email: "anna@example.com" },
-    ];
+    useEffect(() => {
+        if (isOpen) {
+            setSearch("");
+            setStep("list");
+            setSelectedRegistry(null);
+            
+            getUploadedAccessRegistries().then((res) => {
+                if (res.success) {
+                    setRegistries(res.data);
+                } else {
+                    console.error("Ошибка при получении реестров:", res.error);
+                    setRegistries([]);
+                }
+            });
+        }
+    }, [isOpen]);
+    
 
     useEffect(() => {
         if (isOpen) {
-            setRegistries(dummyRegistries);
             setSearch("");
             setStep("list");
         }
     }, [isOpen]);
 
-    const handleRegistryClick = (registry) => {
+    const handleRegistryClick = async (registry) => {
         setSelectedRegistry(registry);
-        setUsers(dummyUsers);
         setSearch("");
         setStep("users");
+
+        const result = await getUsersWithAccess(registry.id);
+        if (result.success) {
+            const usersFromAPI = result.data.map((login, index) => ({
+                id: index,
+                email: login,
+            }));
+            setUsers(usersFromAPI);
+        } else {
+            alert("Не удалось загрузить пользователей: " + result.error);
+            setUsers([]);
+        }
     };
 
     const handleRemoveUser = (userId) => {
