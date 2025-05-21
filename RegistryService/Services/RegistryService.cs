@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using RegistryService.Models.Enums;
 using RegistryService.Models;
 using RegistryServiceProject.Models.Dto;
+using RegistryService.Models.Dto;
 
 namespace RegistryServiceProject.Services
 {
@@ -243,7 +244,42 @@ namespace RegistryServiceProject.Services
             await _db.SaveChangesAsync();
             return true;
         }
-        
+
+        //Созданю запрос доступа
+        public async Task<bool> CreateAccessRequestAsync(int registryId, int userId, string? message)
+        {
+            // храню запрос в таблице
+            var request = new RegistryAccessRequest
+            {
+                RegistryId = registryId,
+                UserId = userId,
+                Message = message,
+                RequestedAt = DateTime.UtcNow
+            };
+
+            _db.RegistryAccessRequests.Add(request);
+            await _db.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<List<RegistryAccessRequestInfoDto>> GetAccessRequestsForUserRegistriesAsync(int ownerUserId)
+        {
+            var requests = await _db.RegistryAccessRequests
+                .Where(r => r.Registry.CreatedByUserId == ownerUserId)
+                .Include(r => r.Registry)
+                .Include(r => r.User)
+                .Select(r => new RegistryAccessRequestInfoDto(
+                    r.UserId,
+                    r.RegistryId,
+                    r.User.Username,
+                    r.Registry.Name,
+                    r.Message
+                ))
+                .ToListAsync();
+
+            return requests;
+        }
+
 
     }
 }

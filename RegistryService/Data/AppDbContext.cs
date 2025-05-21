@@ -10,8 +10,10 @@ namespace RegistryServiceProject.Data
         public DbSet<User> Users { get; set; }
         public DbSet<Registry> Registries { get; set; }
         public DbSet<UserRegistryAccess> UserRegistryAccesses { get; set; }
+        public DbSet<RegistryAccessRequest> RegistryAccessRequests { get; set; }
         public DbSet<RegistryMeta> RegistryMetas { get; set; }
         public DbSet<RegistrySliceRequest> RegistrySliceRequests { get; set; }
+
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
@@ -29,6 +31,18 @@ namespace RegistryServiceProject.Data
                 .HasOne(r => r.Meta)
                 .WithOne(m => m.Registry)
                 .HasForeignKey<RegistryMeta>(m => m.RegistryId);
+
+            modelBuilder.Entity<RegistryAccessRequest>()
+                .HasOne(r => r.Registry)
+                .WithMany()
+                .HasForeignKey(r => r.RegistryId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<RegistryAccessRequest>()
+                .HasOne(r => r.User)
+                .WithMany()
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
