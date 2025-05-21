@@ -121,12 +121,15 @@ namespace RegistryServiceProject.Controllers
                 registry.Id,
                 registry.Name,
                 registry.Description,
+                registry.DefaultAccessLevel,
                 Meta = registry.Meta == null ? null : new
                 {
                     registry.Meta.FileFormat,
                     registry.Meta.Organization,
-                    registry.Meta.RowsCount
+                    registry.Meta.RowsCount,
+                    registry.Meta.FileName
                 }
+
             });
         }
 

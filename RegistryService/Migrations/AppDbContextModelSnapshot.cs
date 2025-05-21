@@ -2,25 +2,22 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RegistryServiceProject.Data;
 
 #nullable disable
 
-namespace RegistryService.Data.Migrations
+namespace RegistryService.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250518162925_AddRefreshTokenFieldsFix")]
-    partial class AddRefreshTokenFieldsFix
+    partial class AppDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.4")
+                .HasAnnotation("ProductVersion", "9.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -52,6 +49,41 @@ namespace RegistryService.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Registries");
+                });
+
+            modelBuilder.Entity("RegistryService.Models.RegistryAccessRequest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Message")
+                        .HasColumnType("text");
+
+                    b.Property<int>("RegistryId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("RejectReason")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("RequestedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RegistryId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RegistryAccessRequests");
                 });
 
             modelBuilder.Entity("RegistryService.Models.RegistryMeta", b =>
@@ -191,6 +223,25 @@ namespace RegistryService.Data.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("UserRegistryAccesses");
+                });
+
+            modelBuilder.Entity("RegistryService.Models.RegistryAccessRequest", b =>
+                {
+                    b.HasOne("RegistryService.Models.Registry", "Registry")
+                        .WithMany()
+                        .HasForeignKey("RegistryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("RegistryService.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Registry");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("RegistryService.Models.RegistryMeta", b =>

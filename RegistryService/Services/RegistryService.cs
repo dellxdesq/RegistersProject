@@ -90,21 +90,23 @@ namespace RegistryServiceProject.Services
             if (registry == null)
                 return null;
 
+            // короче создателю доступ
+            if (registry.CreatedByUserId == userId)
+                return registry;
+
             var access = await _db.UserRegistryAccesses
                 .FirstOrDefaultAsync(a => a.RegistryId == registryId && a.UserId == userId);
 
-            // Если доступ явно не выдан, но реестр публичный — разрешаю доступ
-            if (access == null && registry.DefaultAccessLevel == AccessLevel.Public)
-                return registry;
+            var hasAccess =
+                (access != null && access.IsApproved) ||
+                (access == null && (
+                    registry.DefaultAccessLevel == AccessLevel.Public ||
+                    registry.DefaultAccessLevel == AccessLevel.Requestable
+                ));
 
-            var allowed = access != null && (
-                (access.AccessLevel == AccessLevel.Public) ||
-                (access.AccessLevel == AccessLevel.Requestable && access.IsApproved) ||
-                (access.AccessLevel == AccessLevel.InternalOrganization && access.IsApproved)
-            );
-
-            return allowed ? registry : null;
+            return hasAccess ? registry : null;
         }
+
 
         public async Task<List<RegistryDto>> GetAvailableRegistryListForUserAsync(int userId)
         {

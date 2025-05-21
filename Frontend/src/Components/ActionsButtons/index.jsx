@@ -3,6 +3,8 @@ import styles from "./styles";
 import OpenSlices from "../../Modals/OpenSlices";
 import CreateSliceModal from "../../Modals/CreateSlice";
 import { downloadRegistry } from "../../Api/downloadRegistry";
+import { requestRegistryAccess } from "../../Api/requestRegistryAccess";
+
 
 export default function RegistryActions({ fileFormat, registryId }) {
     const [hovered, setHovered] = useState(null);
@@ -26,8 +28,16 @@ export default function RegistryActions({ fileFormat, registryId }) {
             if (!result.success) {
                 alert("Ошибка при скачивании: " + result.error);
             }
+        } else if (text === "Запросить доступ") {
+            try {
+                const responseText = await requestRegistryAccess(registryId, "Дайте доступ");
+                alert(responseText);
+            } catch (err) {
+                alert("Ошибка: " + err.message);
+            }
         }
     };
+
 
     return (
         <>
