@@ -192,7 +192,7 @@ namespace RegistryServiceProject.Controllers
             return Ok("Запрос на доступ отправлен");
         }
 
-        //requests-access
+        //список запросов к моим реестрам
         [Authorize]
         [HttpGet("requests-access")]
         public async Task<IActionResult> GetAccessRequests()
@@ -202,6 +202,19 @@ namespace RegistryServiceProject.Controllers
                 return Unauthorized();
 
             var requests = await _registryService.GetAccessRequestsForUserRegistriesAsync(callerUserId);
+            return Ok(requests);
+        }
+
+        //список моих запросов к реестрам
+        [Authorize]
+        [HttpGet("my-access-requests")]
+        public async Task<IActionResult> GetMyAccessRequests()
+        {
+            var callerUserIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(callerUserIdStr, out var callerUserId))
+                return Unauthorized();
+
+            var requests = await _registryService.GetMyAccessRequestsAsync(callerUserId);
             return Ok(requests);
         }
 

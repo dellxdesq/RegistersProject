@@ -262,6 +262,7 @@ namespace RegistryServiceProject.Services
             return true;
         }
 
+        //список запросов на мои реестры
         public async Task<List<RegistryAccessRequestInfoDto>> GetAccessRequestsForUserRegistriesAsync(int ownerUserId)
         {
             var requests = await _db.RegistryAccessRequests
@@ -274,6 +275,23 @@ namespace RegistryServiceProject.Services
                     r.User.Username,
                     r.Registry.Name,
                     r.Message
+                ))
+                .ToListAsync();
+
+            return requests;
+        }
+
+        //список моих запросов к реестрам
+        public async Task<List<MyAccessRequestInfoDto>> GetMyAccessRequestsAsync(int userId)
+        {
+            var requests = await _db.RegistryAccessRequests
+                .Where(r => r.UserId == userId)
+                .Include(r => r.Registry)
+                .Select(r => new MyAccessRequestInfoDto(
+                    r.RegistryId,
+                    r.Registry.Name,
+                    r.Message,
+                    r.RequestedAt
                 ))
                 .ToListAsync();
 
