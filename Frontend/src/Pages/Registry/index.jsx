@@ -60,7 +60,7 @@ export default function RegistryPage() {
                 <div style={styles.content}>
                     <RegistryInfo info={info} />
                     <RegistryTable data={data} />
-                    <RegistryActions fileFormat={info.fileFormat} />
+                    <RegistryActions fileFormat="xlsx" registryId={id} />
 
                 </div>
             </div>

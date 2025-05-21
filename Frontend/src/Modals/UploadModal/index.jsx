@@ -1,4 +1,4 @@
-import { useState } from "react";
+import {use, useState} from "react";
 import styles from "./styles";
 import { addRegistry } from "../../Api/uploadRegistry";
 import { getFileFormat } from "../../Utils/getFileFormat";
@@ -12,7 +12,6 @@ export default function UploadModal({ isOpen, onClose }) {
     const [rowsCount, setRowsCount] = useState("");
     const [fileFormat, setFileFormat] = useState("");
     const [accessLevel, setAccessLevel] = useState(1);
-
     const [selectedUsers, setSelectedUsers] = useState([]);
     const [currentUserInput, setCurrentUserInput] = useState("");
 
@@ -45,10 +44,8 @@ export default function UploadModal({ isOpen, onClose }) {
                 alert('Токен не найден, авторизуйтесь!');
                 return;
             }
-
             
             const uploadResult = await uploadRegistryFile(file, token);
-
             
             const requestBody = {
                 name: title,
@@ -57,7 +54,7 @@ export default function UploadModal({ isOpen, onClose }) {
                 organization: organization,
                 rowsCount: Number(rowsCount),
                 defaultAccessLevel: accessLevel,
-                fileName: uploadResult.name,
+                fileName: uploadResult.fileName,
                 userLoginsWithAccess: selectedUsers,
             };
 
