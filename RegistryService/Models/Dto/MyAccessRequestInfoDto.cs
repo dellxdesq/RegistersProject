@@ -1,9 +1,14 @@
-﻿namespace RegistryService.Models.Dto
+﻿using RegistryService.Models.Enums;
+
+namespace RegistryService.Models.Dto
 {
     public record MyAccessRequestInfoDto(
-        int RegistryId,
-        string RegistryName,
-        string? Message,
-        DateTime RequestedAt
-    );
+    int RequestId,
+    int RegistryId,
+    string RegistryName,
+    string? Message,
+    DateTime RequestedAt,
+    AccessRequestStatus Status,
+    string? RejectReason
+);
 }

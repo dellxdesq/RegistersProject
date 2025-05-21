@@ -288,14 +288,76 @@ namespace RegistryServiceProject.Services
                 .Where(r => r.UserId == userId)
                 .Include(r => r.Registry)
                 .Select(r => new MyAccessRequestInfoDto(
+                    r.Id,
                     r.RegistryId,
                     r.Registry.Name,
                     r.Message,
-                    r.RequestedAt
+                    r.RequestedAt,
+                    r.Status,
+                    r.RejectReason
                 ))
                 .ToListAsync();
 
             return requests;
+        }
+
+        public async Task<(bool success, string? errorMessage)> ApproveAccessRequestAsync(int requestId, int currentUserId)
+        {
+            var request = await _db.RegistryAccessRequests
+                .Include(r => r.Registry)
+                .FirstOrDefaultAsync(r => r.Id == requestId);
+
+            if (request == null)
+                return (false, "Запрос не найден");
+
+            if (request.Registry.CreatedByUserId != currentUserId)
+                return (false, "Нет доступа");
+
+            if (request.Status != AccessRequestStatus.Pending)
+                return (false, "Запрос уже обработан");
+
+            request.Status = AccessRequestStatus.Approved;
+
+            var exists = await _db.UserRegistryAccesses
+                .AnyAsync(a => a.RegistryId == request.RegistryId && a.UserId == request.UserId);
+
+            if (!exists)
+            {
+                _db.UserRegistryAccesses.Add(new UserRegistryAccess
+                {
+                    RegistryId = request.RegistryId,
+                    UserId = request.UserId,
+                    AccessLevel = request.Registry.DefaultAccessLevel,
+                    IsApproved = true,
+                    GrantedAt = DateTime.UtcNow
+                });
+            }
+
+            await _db.SaveChangesAsync();
+            return (true, null);
+        }
+
+        //отказ
+        public async Task<(bool success, string? errorMessage)> RejectAccessRequestAsync(int requestId, int currentUserId, string? reason)
+        {
+            var request = await _db.RegistryAccessRequests
+                .Include(r => r.Registry)
+                .FirstOrDefaultAsync(r => r.Id == requestId);
+
+            if (request == null)
+                return (false, "Запрос не найден");
+
+            if (request.Registry.CreatedByUserId != currentUserId)
+                return (false, "Нет доступа");
+
+            if (request.Status != AccessRequestStatus.Pending)
+                return (false, "Запрос уже обработан");
+
+            request.Status = AccessRequestStatus.Rejected;
+            request.RejectReason = reason;
+
+            await _db.SaveChangesAsync();
+            return (true, null);
         }
 
 

@@ -218,6 +218,37 @@ namespace RegistryServiceProject.Controllers
             return Ok(requests);
         }
 
+        private int GetUserId()
+        {
+            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdStr == null || !int.TryParse(userIdStr, out var userId))
+                throw new UnauthorizedAccessException("Invalid or missing user ID");
+            return userId;
+        }
+
+        [HttpPost("access-requests/{id}/approve")]
+        public async Task<IActionResult> ApproveAccessRequest(int id)
+        {
+            var userId = GetUserId();
+            var (success, errorMessage) = await _registryService.ApproveAccessRequestAsync(id, userId);
+
+            if (!success)
+                return BadRequest(errorMessage);
+
+            return Ok(true);
+        }
+
+        [HttpPost("access-requests/{id}/reject")]
+        public async Task<IActionResult> RejectAccessRequest(int id, [FromBody] RejectRequestDto dto)
+        {
+            var userId = GetUserId();
+            var (success, errorMessage) = await _registryService.RejectAccessRequestAsync(id, userId, dto.Reason);
+
+            if (!success)
+                return BadRequest(errorMessage);
+
+            return Ok(true);
+        }
+
     }
 }
-    
