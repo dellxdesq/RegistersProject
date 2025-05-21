@@ -10,5 +10,5 @@ namespace RegistryService.Models.Dto
     DateTime RequestedAt,
     AccessRequestStatus Status,
     string? RejectReason
-);
+    );
 }

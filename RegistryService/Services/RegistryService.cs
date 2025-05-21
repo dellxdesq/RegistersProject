@@ -266,15 +266,17 @@ namespace RegistryServiceProject.Services
         public async Task<List<RegistryAccessRequestInfoDto>> GetAccessRequestsForUserRegistriesAsync(int ownerUserId)
         {
             var requests = await _db.RegistryAccessRequests
-                .Where(r => r.Registry.CreatedByUserId == ownerUserId)
+                .Where(r => r.Registry.CreatedByUserId == ownerUserId && r.Status == AccessRequestStatus.Pending)
                 .Include(r => r.Registry)
                 .Include(r => r.User)
                 .Select(r => new RegistryAccessRequestInfoDto(
+                    r.Id,
                     r.UserId,
                     r.RegistryId,
                     r.User.Username,
                     r.Registry.Name,
-                    r.Message
+                    r.Message,
+                    r.RequestedAt
                 ))
                 .ToListAsync();
 
@@ -301,6 +303,7 @@ namespace RegistryServiceProject.Services
             return requests;
         }
 
+        //принять запрос
         public async Task<(bool success, string? errorMessage)> ApproveAccessRequestAsync(int requestId, int currentUserId)
         {
             var request = await _db.RegistryAccessRequests
@@ -358,6 +361,19 @@ namespace RegistryServiceProject.Services
 
             await _db.SaveChangesAsync();
             return (true, null);
+        }
+
+        //удаление запроса
+        public async Task<bool> DeleteAccessRequestAsync(int requestId)
+        {
+            var request = await _db.RegistryAccessRequests.FirstOrDefaultAsync(r => r.Id == requestId);
+            if (request == null)
+                return false;
+
+            _db.RegistryAccessRequests.Remove(request);
+            await _db.SaveChangesAsync();
+
+            return true;
         }
 
 

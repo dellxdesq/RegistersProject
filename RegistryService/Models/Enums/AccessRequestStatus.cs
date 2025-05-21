@@ -2,8 +2,8 @@
 {
     public enum AccessRequestStatus
     {
-        Pending,
-        Approved,
-        Rejected
+        Pending = 0,   //в ожидании
+        Approved = 1,  //подтверждён
+        Rejected = 2   //отказан
     }
 }

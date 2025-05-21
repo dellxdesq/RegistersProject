@@ -226,6 +226,8 @@ namespace RegistryServiceProject.Controllers
             return userId;
         }
 
+        //принять запрос
+        [Authorize]
         [HttpPost("access-requests/{id}/approve")]
         public async Task<IActionResult> ApproveAccessRequest(int id)
         {
@@ -238,6 +240,8 @@ namespace RegistryServiceProject.Controllers
             return Ok(true);
         }
 
+        //отказать на запрос
+        [Authorize]
         [HttpPost("access-requests/{id}/reject")]
         public async Task<IActionResult> RejectAccessRequest(int id, [FromBody] RejectRequestDto dto)
         {
@@ -248,6 +252,20 @@ namespace RegistryServiceProject.Controllers
                 return BadRequest(errorMessage);
 
             return Ok(true);
+        }
+        
+        //удалить запрос
+        [Authorize]
+        [HttpDelete("access-requests/{id}")]
+        public async Task<IActionResult> DeleteAccessRequest(int id)
+        {
+            GetUserId();
+            var deleted = await _registryService.DeleteAccessRequestAsync(id);
+
+            if (!deleted)
+                return NotFound("Запрос не найден");
+
+            return Ok();
         }
 
     }
