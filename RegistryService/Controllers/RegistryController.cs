@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using RegistryService.Models.Dto;
 using RegistryServiceProject.Models.Dto;
 using RegistryServiceProject.Services;
 using System.Security.Claims;
@@ -163,12 +164,109 @@ namespace RegistryServiceProject.Controllers
 
             var fileName = registry.Meta.FileName;
 
-            // Скачиваем файл с MinIO через StorageService
-            var httpClient = new HttpClient(); // лучше через DI
-            var stream = await httpClient.GetStreamAsync($"http://localhost:5002/api/v1/storage/download/{fileName}");
+            // Запросить ссылку у StorageService
+            var httpClient = new HttpClient(); // лучше через IHttpClientFactory
+            var response = await httpClient.GetFromJsonAsync<PresignedUrlResponse>(
+                $"http://localhost:5002/api/v1/storage/download-link/{fileName}");
 
-            return File(stream, "application/octet-stream", fileName);
+            if (response == null || string.IsNullOrEmpty(response.Url))
+                return StatusCode(500, "Не удалось получить ссылку на скачивание");
+
+            return Ok(new { DownloadUrl = response.Url });
         }
+
+        //Запрос доступа к реестру
+        [Authorize]
+        [HttpPost("{id}/request-access")]
+        public async Task<IActionResult> RequestAccess(int id, [FromBody] AccessRequestMessageDto dto)
+        {
+            var callerUserIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(callerUserIdStr, out var callerUserId))
+                return Unauthorized();
+
+            var success = await _registryService.CreateAccessRequestAsync(id, callerUserId, dto.Message);
+
+            if (!success)
+                return BadRequest("Не удалось отправить запрос на доступ");
+
+            return Ok("Запрос на доступ отправлен");
+        }
+
+        //список запросов к моим реестрам
+        [Authorize]
+        [HttpGet("requests-access")]
+        public async Task<IActionResult> GetAccessRequests()
+        {
+            var callerUserIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(callerUserIdStr, out var callerUserId))
+                return Unauthorized();
+
+            var requests = await _registryService.GetAccessRequestsForUserRegistriesAsync(callerUserId);
+            return Ok(requests);
+        }
+
+        //список моих запросов к реестрам
+        [Authorize]
+        [HttpGet("my-access-requests")]
+        public async Task<IActionResult> GetMyAccessRequests()
+        {
+            var callerUserIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(callerUserIdStr, out var callerUserId))
+                return Unauthorized();
+
+            var requests = await _registryService.GetMyAccessRequestsAsync(callerUserId);
+            return Ok(requests);
+        }
+
+        private int GetUserId()
+        {
+            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdStr == null || !int.TryParse(userIdStr, out var userId))
+                throw new UnauthorizedAccessException("Invalid or missing user ID");
+            return userId;
+        }
+
+        //принять запрос
+        [Authorize]
+        [HttpPost("access-requests/{id}/approve")]
+        public async Task<IActionResult> ApproveAccessRequest(int id)
+        {
+            var userId = GetUserId();
+            var (success, errorMessage) = await _registryService.ApproveAccessRequestAsync(id, userId);
+
+            if (!success)
+                return BadRequest(errorMessage);
+
+            return Ok(true);
+        }
+
+        //отказать на запрос
+        [Authorize]
+        [HttpPost("access-requests/{id}/reject")]
+        public async Task<IActionResult> RejectAccessRequest(int id, [FromBody] RejectRequestDto dto)
+        {
+            var userId = GetUserId();
+            var (success, errorMessage) = await _registryService.RejectAccessRequestAsync(id, userId, dto.Reason);
+
+            if (!success)
+                return BadRequest(errorMessage);
+
+            return Ok(true);
+        }
+        
+        //удалить запрос
+        [Authorize]
+        [HttpDelete("access-requests/{id}")]
+        public async Task<IActionResult> DeleteAccessRequest(int id)
+        {
+            GetUserId();
+            var deleted = await _registryService.DeleteAccessRequestAsync(id);
+
+            if (!deleted)
+                return NotFound("Запрос не найден");
+
+            return Ok();
+        }
+
     }
 }
-    

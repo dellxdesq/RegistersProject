@@ -7,3 +7,4 @@
 /RegistersProject/obj/
 /backend/appsettings.Development.json
 *.env
+/RegistryService/Data/Migrations/AppDbContextModelSnapshot.cs
