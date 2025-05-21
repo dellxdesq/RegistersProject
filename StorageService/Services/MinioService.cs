@@ -44,17 +44,28 @@ namespace StorageService.Services
             return uniqueFileName;
         }
 
-        public async Task<Stream> DownloadFileAsync(string objectName)
+        //public async Task<Stream> DownloadFileAsync(string objectName)
+        //{
+        //    var stream = new MemoryStream();
+        //    var args = new GetObjectArgs()
+        //        .WithBucket(_bucketName)
+        //        .WithObject(objectName)
+        //        .WithCallbackStream(data => data.CopyTo(stream));
+
+        //    await _minio.GetObjectAsync(args);
+        //    stream.Position = 0;
+        //    return stream;
+        //}
+
+        //отдаёт ссылку на скачивание
+        public async Task<string> GetPresignedDownloadUrlAsync(string objectName, int expireSeconds = 60)
         {
-            var stream = new MemoryStream();
-            var args = new GetObjectArgs()
+            var args = new PresignedGetObjectArgs()
                 .WithBucket(_bucketName)
                 .WithObject(objectName)
-                .WithCallbackStream(data => data.CopyTo(stream));
+                .WithExpiry(expireSeconds);
 
-            await _minio.GetObjectAsync(args);
-            stream.Position = 0;
-            return stream;
+            return await _minio.PresignedGetObjectAsync(args);
         }
     }
 }

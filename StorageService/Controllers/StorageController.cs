@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using StorageService.Services;
 
 namespace StorageService.Controllers
@@ -13,7 +14,7 @@ namespace StorageService.Controllers
         {
             _minioService = minioService;
         }
-
+        [Authorize]
         [HttpPost("upload")]
         public async Task<IActionResult> Upload(IFormFile file)
         {
@@ -21,11 +22,11 @@ namespace StorageService.Controllers
             return Ok(new { Message = "Файл успешно загружен", FileName = fileName });
         }
 
-        [HttpGet("download/{objectName}")]
-        public async Task<IActionResult> Download(string objectName)
+        [HttpGet("download-link/{objectName}")]
+        public async Task<IActionResult> GetPresignedUrl(string objectName)
         {
-            var stream = await _minioService.DownloadFileAsync(objectName);
-            return File(stream, "application/octet-stream", objectName);
+            var url = await _minioService.GetPresignedDownloadUrlAsync(objectName);
+            return Ok(new { Url = url });
         }
     }
 }
