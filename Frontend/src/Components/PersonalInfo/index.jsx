@@ -3,7 +3,8 @@ import styles from "../PersonalInfo/styles";
 import { getProfile } from "../../Api/getUserProfileInfo";
 import { updateProfile } from "../../Api/changeUserProfile";
 import ChangePasswordModal from "../../Modals/ChangePassword"
-
+import {logout} from "../../Api/logoutUser"
+import {useAuth} from "../../Context/AuthContext";
 export default function PersonalInfo({ onChangePassword, onLogout }) {
     const [formData, setFormData] = useState({
         organization: "",
@@ -13,6 +14,7 @@ export default function PersonalInfo({ onChangePassword, onLogout }) {
     });
     const [editing, setEditing] = useState(false);
     const [showPasswordModal, setShowPasswordModal] = useState(false);
+    
     useEffect(() => {
         getProfile().then(res => {
             if (res.success) {
@@ -41,6 +43,22 @@ export default function PersonalInfo({ onChangePassword, onLogout }) {
             }
         }
         setEditing(prev => !prev);
+    };
+
+    const { logout: logoutFromContext } = useAuth();
+
+    const handleLogout = async () => {
+        const res = await logout();
+        if (res.success) {
+            logoutFromContext();
+            if (onLogout) {
+                onLogout();
+            } else {
+                window.location.href = "/login";
+            }
+        } else {
+            alert("Ошибка при выходе: " + res.error);
+        }
     };
 
     return (
@@ -112,7 +130,7 @@ export default function PersonalInfo({ onChangePassword, onLogout }) {
                     >
                         {editing ? "Сохранить" : "Редактировать"}
                     </button>
-                    <button style={styles.logoutButton} onClick={onLogout}>Выход</button>
+                    <button style={styles.logoutButton} onClick={handleLogout}>Выход</button>
                 </div>
             </div>
             {showPasswordModal && (

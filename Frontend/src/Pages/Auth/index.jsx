@@ -4,18 +4,21 @@ import styles from "./styles";
 import { useToast } from "../../Context/ToastContext";
 import LoginForm from "../../Components/LoginForm";
 import { loginUser } from "../../Api/loginUser";
+import {useAuth} from "../../Context/AuthContext";
 
 export default function LoginPage() {
     const navigate = useNavigate();
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const { showToast } = useToast();
-
+    const { login } = useAuth();
+    
+    
     const handleLogin = async (e) => {
         e.preventDefault();
 
         const result = await loginUser({ username, password });
-
+        
         if (!result.success) {
             showToast(result.error);
             return;

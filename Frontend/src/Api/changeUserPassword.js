@@ -1,13 +1,10 @@
 import { getAuthHeaders } from "../Utils/getAuthHeaders";
+import { authFetch } from "./authFetch";
 
 export async function changePassword(currentPassword, newPassword) {
     try {
-        const response = await fetch("https://localhost:8081/api/v1/auth/change-password", {
+        const response = await authFetch("/auth/change-password", {
             method: "POST",
-            headers: {
-                ...getAuthHeaders(),
-                "Content-Type": "application/json",
-            },
             body: JSON.stringify({
                 CurrentPassword: currentPassword,
                 NewPassword: newPassword,

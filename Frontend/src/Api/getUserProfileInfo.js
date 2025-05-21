@@ -1,10 +1,10 @@
 import { getAuthHeaders } from "../Utils/getAuthHeaders";
-
+import { authFetch } from "./authFetch";
 export async function getProfile() {
     try {
-        const response = await fetch("https://localhost:8081/api/v1/auth/profile", {
+        const response = await authFetch("/auth/profile", {
             method: "GET",
-            headers: getAuthHeaders()
+            
         });
 
         if (!response.ok) {

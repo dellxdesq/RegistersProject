@@ -1,7 +1,7 @@
 import {getAuthHeaders} from "../Utils/getAuthHeaders";
 
 export async function validateToken() {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("access_token");
 
     if (!token) {
         return { isValid: false, error: "Токен отсутствует" };

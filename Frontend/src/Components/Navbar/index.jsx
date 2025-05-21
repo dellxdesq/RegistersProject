@@ -1,9 +1,11 @@
 import styles from "../Navbar/styles";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import {useAuth} from "../../Context/AuthContext";
 
 export default function Index() {
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [username, setUsername] = useState(null);
 
     useEffect(() => {
@@ -18,16 +20,13 @@ export default function Index() {
     return (
         <div style={styles.navbar}>
             <div style={styles.leftGroup}>
-                <button
-                    style={styles.navButton}
-                    onClick={() => navigate("/", { state: { mode: "all" } })}
-                >
+                <button style={styles.navButton} onClick={() => navigate("/", { state: { mode: "all" } })}>
                     Главная
                 </button>
             </div>
             <div style={styles.rightGroup}>
-                {username ? (
-                    <div style={styles.navButton}>Добро пожаловать, {username}</div>
+                {user ? (
+                    <div style={styles.navButton}>Добро пожаловать, {user.username}</div>
                 ) : (
                     <button onClick={() => navigate("/auth")} style={styles.navButton}>
                         Войти
