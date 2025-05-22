@@ -1,26 +1,38 @@
 import styles from "../AccessButtons/styles";
 import stylesMain from "../PersonalInfo/styles";
 import GrantedAccessModal from "../../Modals/GrantedAccess";
+import RequestedAccessModal from "../../Modals/RequestedAccess";
 import { useNavigate } from "react-router-dom";
-import {useState} from "react";
+import { useState } from "react";
 
 export default function AccessButtons() {
     const navigate = useNavigate();
-    const [isModalOpen, setModalOpen] = useState(false);
+    const [isGrantedModalOpen, setGrantedModalOpen] = useState(false);
+    const [isRequestedModalOpen, setRequestedModalOpen] = useState(false);
+
     return (
         <div style={stylesMain.container}>
             <div style={styles.rightPanel}>
                 <button
                     style={styles.rightButton}
-                    onClick={() => setModalOpen(true)}>
+                    onClick={() => setGrantedModalOpen(true)}>
                     Выданные доступы
                 </button>
-                <GrantedAccessModal isOpen={isModalOpen} onClose={() => setModalOpen(false)}/>
+                <GrantedAccessModal
+                    isOpen={isGrantedModalOpen}
+                    onClose={() => setGrantedModalOpen(false)}
+                />
+
                 <button
                     style={styles.rightButton}
-                    onClick={() => navigate("/", { state: { mode: "requested" } })}>
+                    onClick={() => setRequestedModalOpen(true)}> {}
                     Запрошенные доступы
                 </button>
+                <RequestedAccessModal
+                    isOpen={isRequestedModalOpen}
+                    onClose={() => setRequestedModalOpen(false)}
+                />
+
                 <button
                     style={styles.rightButton}
                     onClick={() => navigate("/", { state: { mode: "available" } })}>
