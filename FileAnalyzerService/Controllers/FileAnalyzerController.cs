@@ -29,5 +29,12 @@ namespace FileAnalyzerService.Controllers
             var result = await _fileAnalyzerService.GetPreviewAsync(fileName);
             return Ok(result);
         }
+
+        [HttpGet("{fileName}/full")]
+        public async Task<IActionResult> FullContent(string fileName)
+        {
+            var result = await _fileAnalyzerService.GetFullContentAsync(fileName);
+            return Ok(result);
+        }
     }
 }
