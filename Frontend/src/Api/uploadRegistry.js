@@ -1,9 +1,9 @@
+import { authFetch } from "./authFetch";
 import { getAuthHeaders } from "../Utils/getAuthHeaders"
 export async function addRegistry(data, token) {
     try {
-        const response = await fetch('https://localhost:8081/api/v1/registries/add', {
+        const response = await authFetch('/registries/add', {
             method: 'POST',
-            headers: getAuthHeaders(),
             body: JSON.stringify(data),
         });
 

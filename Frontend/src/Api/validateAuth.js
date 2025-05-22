@@ -1,5 +1,5 @@
 import {getAuthHeaders} from "../Utils/getAuthHeaders";
-
+import { authFetch } from "./authFetch";
 export async function validateToken() {
     const token = localStorage.getItem("access_token");
 

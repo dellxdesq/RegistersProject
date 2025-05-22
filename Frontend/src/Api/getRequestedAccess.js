@@ -1,10 +1,9 @@
+import { authFetch } from "./authFetch";
 export async function getRequestedAccess() {
     try {
         const token = localStorage.getItem("access_token");
-        const response = await fetch("https://localhost:8081/api/v1/registries/requests-access", {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
+        const response = await authFetch("/registries/requests-access", {
+            method: "GET",
         });
 
         if (!response.ok) {

@@ -1,12 +1,9 @@
+import { authFetch } from "./authFetch";
 export async function rejectRequest(requestId) {
     try {
         const token = localStorage.getItem("access_token");
-        const response = await fetch(`https://localhost:8081/api/v1/registries/access-requests/${requestId}/reject`, {
+        const response = await authFetch(`/registries/access-requests/${requestId}/reject`, {
             method: "POST",
-            headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json"
-            },
             body: JSON.stringify({})
         });
 

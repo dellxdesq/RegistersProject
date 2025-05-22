@@ -1,0 +1,75 @@
+const styles = {
+    overlay: {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 1000,
+    },
+    modal: {
+        backgroundColor: '#fff',
+        padding: '30px',
+        borderRadius: '10px',
+        width: '500px',
+        maxHeight: '80vh',
+        overflowY: 'auto',
+        boxShadow: '0 5px 15px rgba(0,0,0,0.3)',
+        position: 'relative',
+    },
+    closeButton: {
+        position: 'absolute',
+        top: '10px',
+        right: '15px',
+        fontSize: '20px',
+        background: 'transparent',
+        border: 'none',
+        cursor: 'pointer',
+    },
+    section: {
+        marginBottom: '20px',
+    },
+    input: {
+        width: '480px',
+        padding: '10px',
+        borderRadius: '6px',
+        border: '1px solid #ccc',
+        fontFamily: 'inherit',
+    },
+    list: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '10px',
+    },
+    item: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
+    },
+    buttons: {
+        display: 'flex',
+        justifyContent: 'space-between',
+    },
+    addButton: {
+        backgroundColor: '#007bff',
+        color: 'white',
+        padding: '10px 15px',
+        border: 'none',
+        borderRadius: '6px',
+        cursor: 'pointer',
+    },
+    cancelButton: {
+        backgroundColor: '#ccc',
+        color: '#333',
+        padding: '10px 15px',
+        border: 'none',
+        borderRadius: '6px',
+        cursor: 'pointer',
+    },
+};
+
+export default styles;

@@ -1,12 +1,12 @@
 import { getAuthHeaders } from "../Utils/getAuthHeaders";
+import { authFetch } from "./authFetch";
 
 export async function getUploadedAccessRegistries() {
-    const url = "https://localhost:8081/api/v1/registries/list/uploaded/acces-level/2-3";
+    const url = "/registries/list/uploaded/acces-level/2-3";
 
     try {
-        const response = await fetch(url, {
+        const response = await authFetch(url, {
             method: "GET",
-            headers: getAuthHeaders()
         });
 
         if (!response.ok) {

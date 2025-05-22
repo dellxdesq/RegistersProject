@@ -1,12 +1,12 @@
 import { getAuthHeaders } from "../Utils/getAuthHeaders";
+import { authFetch } from "./authFetch";
 
 export async function fetchUserRegistries(userId) {
-    const url = `https://localhost:8081/api/v1/registries/user/${userId}`;
+    const url = `/registries/user/${userId}`;
 
     try {
-        const response = await fetch(url, {
+        const response = await authFetch(url, {
             method: "GET",
-            headers: getAuthHeaders()
         });
 
         if (!response.ok) {

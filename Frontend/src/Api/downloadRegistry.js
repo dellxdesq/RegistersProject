@@ -1,12 +1,12 @@
 import { getAuthHeaders } from "../Utils/getAuthHeaders";
+import { authFetch } from "./authFetch";
 
 export async function downloadRegistry(registryId) {
-    const url = `https://localhost:8081/api/v1/registries/${registryId}/download`;
+    const url = `/registries/${registryId}/download`;
 
     try {
-        const response = await fetch(url, {
+        const response = await authFetch(url, {
             method: "GET",
-            headers: getAuthHeaders()
         });
 
         if (!response.ok) {

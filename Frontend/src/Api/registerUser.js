@@ -1,3 +1,5 @@
+import { authFetch } from "./authFetch";
+
 export async function registerUser({ username, email, password }) {
     const response = await fetch("https://localhost:8081/api/v1/auth/register", {
         method: "POST",

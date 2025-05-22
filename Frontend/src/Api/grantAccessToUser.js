@@ -1,15 +1,11 @@
 import { getAuthHeaders } from "../Utils/getAuthHeaders";
-
+import { authFetch } from "./authFetch";
 export async function grantAccessToUser(registryId, username) {
-    const url = `https://localhost:8081/api/v1/registries/${registryId}/users/access`;
+    const url = `/registries/${registryId}/users/access`;
 
     try {
-        const response = await fetch(url, {
+        const response = await authFetch(url, {
             method: "POST",
-            headers: {
-                ...getAuthHeaders(),
-                "Content-Type": "application/json",
-            },
             body: JSON.stringify({ username }),
         });
 

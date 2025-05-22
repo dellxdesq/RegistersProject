@@ -1,4 +1,4 @@
-
+import { authFetch } from "./authFetch";
 export async function loginUser({ username, password }) {
     try {
         const response = await fetch("https://localhost:8081/api/v1/auth/login", {

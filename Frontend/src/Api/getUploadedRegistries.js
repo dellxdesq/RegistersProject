@@ -1,10 +1,10 @@
 import { getAuthHeaders } from "../Utils/getAuthHeaders";
+import { authFetch } from "./authFetch";
 
 export async function getUploadedRegistries() {
     try {
-        const response = await fetch("https://localhost:8081/api/v1/registries/list/uploaded", {
+        const response = await authFetch("/registries/list/uploaded", {
             method: "GET",
-            headers: getAuthHeaders()
         });
 
         if (!response.ok) {

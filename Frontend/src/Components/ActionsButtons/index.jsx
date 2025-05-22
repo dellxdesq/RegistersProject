@@ -4,13 +4,14 @@ import OpenSlices from "../../Modals/OpenSlices";
 import CreateSliceModal from "../../Modals/CreateSlice";
 import { downloadRegistry } from "../../Api/downloadRegistry";
 import { requestRegistryAccess } from "../../Api/requestRegistryAccess";
+import ChartModal from "../../Modals/ChartModal";
 
 
 export default function RegistryActions({ fileFormat, registryId }) {
     const [hovered, setHovered] = useState(null);
     const [isSlicesOpen, setIsSlicesOpen] = useState(false);
     const [isCreateSliceOpen, setIsCreateSliceOpen] = useState(false);
-
+    const [isChartOpen, setIsChartOpen] = useState(false);
     const dummyHeaders = ["ID", "Имя", "Дата", "Тип"];
 
     const getButtonStyle = (index) => ({
@@ -23,6 +24,8 @@ export default function RegistryActions({ fileFormat, registryId }) {
             setIsSlicesOpen(true);
         } else if (text === "Сделать срез") {
             setIsCreateSliceOpen(true);
+        } else if (text === "Сделать график") {
+            setIsChartOpen(true);
         } else if (text === "Скачать") {
             const result = await downloadRegistry(registryId);
             if (!result.success) {
@@ -65,6 +68,11 @@ export default function RegistryActions({ fileFormat, registryId }) {
                 onClose={() => setIsCreateSliceOpen(false)}
                 headers={dummyHeaders}
                 fileFormat={fileFormat}
+            />
+            <ChartModal
+                isOpen={isChartOpen}
+                onClose={() => setIsChartOpen(false)}
+                headers={dummyHeaders}
             />
         </>
     );

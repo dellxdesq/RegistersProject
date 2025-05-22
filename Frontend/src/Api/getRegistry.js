@@ -1,4 +1,6 @@
 import { getAuthHeaders } from "../Utils/getAuthHeaders"
+import { authFetch } from "./authFetch";
+
 export async function fetchRegistries() {
     const token = localStorage.getItem("token");
 
@@ -7,9 +9,8 @@ export async function fetchRegistries() {
     }
 
     try {
-        const response = await fetch("https://localhost:8081/api/v1/registries", {
+        const response = await authFetch("/registries", {
             method: "GET",
-            headers: getAuthHeaders()
         });
 
         if (!response.ok) {
