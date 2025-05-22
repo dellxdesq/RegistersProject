@@ -5,16 +5,21 @@ using RegistryService.Models.Enums;
 using RegistryService.Models;
 using RegistryServiceProject.Models.Dto;
 using RegistryService.Models.Dto;
+using System.Net.Http;
 
 namespace RegistryServiceProject.Services
 {
     public class RegistryService
     {
         private readonly AppDbContext _db;
+        private readonly HttpClient _httpClient;
+        private readonly IConfiguration _config;
 
-        public RegistryService(AppDbContext db)
+        public RegistryService(AppDbContext db, HttpClient httpClient, IConfiguration config)
         {
             _db = db;
+            _httpClient = httpClient;
+            _config = config;
         }
 
         public async Task<List<Registry>> GetRegistriesAsync(int? userId)
@@ -145,13 +150,17 @@ namespace RegistryServiceProject.Services
             _db.Registries.Add(registry);
             await _db.SaveChangesAsync(); // надо, чтобы получить registry.Id
 
+            //var analyzerUrl = $"{_config["AnalyzerService:BaseUrl"]}/api/v1/file-preview/{request.FileName}";
+            var analyzerUrl = $"http://localhost:5008/api/v1/file-preview/{request.FileName}";
+            var analysis = await _httpClient.GetFromJsonAsync<FileAnalysisDto>(analyzerUrl);
+
             var meta = new RegistryMeta
             {
                 RegistryId = registry.Id,
-                FileFormat = request.FileFormat,
+                FileFormat = analysis.Extension,
                 Organization = request.Organization,
-                RowsCount = request.RowsCount,
-                FileName = request.FileName //имя файла в MinIO
+                RowsCount = analysis.RowsCount,
+                FileName = request.FileName
             };
 
             _db.RegistryMetas.Add(meta);

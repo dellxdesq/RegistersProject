@@ -19,6 +19,11 @@ echo Запуск ExternalApiService...
 cd /d "%ROOT%ExternalApiService"
 start cmd /k "dotnet run --launch-profile https"
 
+:: Запуск FileAnalyzerService
+echo Запуск FileAnalyzerService...
+cd /d "%ROOT%FileAnalyzerService"
+start cmd /k "dotnet run --launch-profile https"
+
 :: Запуск RegistryService
 echo Запуск RegistryService...
 cd /d "%ROOT%RegistryService"

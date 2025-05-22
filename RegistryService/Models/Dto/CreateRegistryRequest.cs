@@ -6,12 +6,9 @@ namespace RegistryServiceProject.Models.Dto
     {
         public required string Name { get; set; }
         public required string Description { get; set; }
-        public required string FileFormat { get; set; }
         public required string Organization { get; set; }
-        public int RowsCount { get; set; }
         public AccessLevel DefaultAccessLevel { get; set; }
         public string FileName { get; set; } = string.Empty;
-
         public List<string>? UserLoginsWithAccess { get; set; }
     }
 }
