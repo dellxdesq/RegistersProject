@@ -1,5 +1,4 @@
-import { getAuthHeaders } from "../Utils/getAuthHeaders";
-import { authFetch } from "./authFetch";
+import { authFetch } from "../authFetch";
 
 export async function fetchUserRegistries(userId) {
     const url = `/registries/user/${userId}`;

@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import styles from "./styles";
-import { getRequestedAccess } from "../../Api/getRequestedAccess";
-import { approveRequest } from "../../Api/approveRequest";
-import {rejectRequest} from "../../Api/rejectRequest";
+import { getRequestedAccess } from "../../Api/Accesses/getRequestedAccess";
+import { approveRequest } from "../../Api/Accesses/approveRequest";
+import {rejectRequest} from "../../Api/Accesses/rejectRequest";
 
 export default function RequestedAccessModal({ isOpen, onClose }) {
     const [selectedUser, setSelectedUser] = useState(null);

@@ -1,4 +1,4 @@
-import { authFetch } from "./authFetch";
+import { authFetch } from "../authFetch";
 export async function deleteAccessRequest(requestId) {
     try {
         const response = await authFetch(`/registries/access-requests/${requestId}`, {

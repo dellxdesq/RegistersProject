@@ -1,9 +1,9 @@
 import {use, useState} from "react";
 import styles from "./styles";
-import { addRegistry } from "../../Api/uploadRegistry";
+import { addRegistry } from "../../Api/Registries/uploadRegistry";
 import { getFileFormat } from "../../Utils/getFileFormat";
 import { countFileRows } from "../../Utils/countFileRows";
-import {uploadRegistryFile} from "../../Api/uploadRegistryS3"
+import {uploadRegistryFile} from "../../Api/Registries/uploadRegistryS3"
 export default function UploadModal({ isOpen, onClose }) {
     const [title, setTitle] = useState("");
     const [file, setFile] = useState(null);

@@ -1,5 +1,4 @@
-import { authFetch } from "./authFetch";
-import {getAuthHeaders} from "../Utils/getAuthHeaders";
+import { authFetch } from "../authFetch";
 
 export async function uploadRegistryFile(file, token) {
     const formData = new FormData();

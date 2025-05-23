@@ -1,5 +1,4 @@
-import { authFetch } from "./authFetch";
-import { getAuthHeaders } from "../Utils/getAuthHeaders"
+import { authFetch } from "../authFetch";
 export async function addRegistry(data, token) {
     try {
         const response = await authFetch('/registries/add', {

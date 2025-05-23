@@ -4,9 +4,9 @@ import OpenSlices from "../../Modals/OpenSlices";
 import CreateSliceModal from "../../Modals/CreateSlice";
 import ChartModal from "../../Modals/ChartModal";
 import { downloadRegistry } from "../../Api/Registries/downloadRegistry";
-import { requestRegistryAccess } from "../../Api/requestRegistryAccess";
-import { deleteAccessRequest } from "../../Api/deleteAccessRequest";
-import { getRequestedAccess } from "../../Api/getRequestedAccess";
+import { requestRegistryAccess } from "../../Api/Accesses/requestRegistryAccess";
+import { deleteAccessRequest } from "../../Api/Accesses/deleteAccessRequest";
+import { getRequestedAccess } from "../../Api/Accesses/getRequestedAccess";
 import {parseJwt} from "../../Utils/parseJwt";
 
 export default function RegistryActions({registryId }) {

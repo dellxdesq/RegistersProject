@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { getUploadedAccessRegistries } from "../../Api/getAccessList";
-import { getUsersWithAccess } from "../../Api/getUsersWithAccess";
-import { grantAccessToUser } from "../../Api/grantAccessToUser";
-import { deleteUserAccess } from "../../Api/deleteUserAccess";
+import { getUploadedAccessRegistries } from "../../Api/Accesses/getAccessList";
+import { getUsersWithAccess } from "../../Api/Accesses/getUsersWithAccess";
+import { grantAccessToUser } from "../../Api/Accesses/grantAccessToUser";
+import { deleteUserAccess } from "../../Api/Accesses/deleteUserAccess";
 
 
 import styles from "./styles";

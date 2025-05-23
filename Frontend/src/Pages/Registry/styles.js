@@ -23,6 +23,25 @@ const styles = {
         overflowY: "auto",
         paddingRight: "10px",
     },
+
+    tableWrapper: {
+        position: "relative",
+        border: "1px solid #ccc",
+        padding: "10px",
+        borderRadius: "8px",
+    },
+    fullViewButton: {
+        position: "absolute",
+        top: "10px",
+        right: "10px",
+        padding: "6px 12px",
+        fontSize: "14px",
+        backgroundColor: "#007bff",
+        color: "white",
+        border: "none",
+        borderRadius: "4px",
+        cursor: "pointer",
+    },
 };
 
 export default styles;

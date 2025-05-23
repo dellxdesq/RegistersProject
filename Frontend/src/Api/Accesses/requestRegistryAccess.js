@@ -1,4 +1,4 @@
-import { authFetch } from "./authFetch";
+import { authFetch } from "../authFetch";
 export async function requestRegistryAccess(registryId, message = "Дайте доступ") {
     const token = localStorage.getItem("token");
     if (!token) {

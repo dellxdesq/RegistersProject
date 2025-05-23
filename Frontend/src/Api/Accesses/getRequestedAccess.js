@@ -1,4 +1,4 @@
-import { authFetch } from "./authFetch";
+import { authFetch } from "../authFetch";
 export async function getRequestedAccess() {
     try {
         const response = await authFetch("/registries/requests-access", {

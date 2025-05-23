@@ -9,6 +9,19 @@ const styles = {
     infoItem: {
         marginBottom: 8,
     },
+    headerRow: {
+        display: "flex",
+        justifyContent: "space-between",
+        
+    },
+    fullViewButton: {
+        padding: "6px 12px",
+        backgroundColor: "#61bbfb",
+        color: "black",
+        border: "none",
+        borderRadius: 4,
+        cursor: "pointer",
+    },
 };
 
 export default styles;

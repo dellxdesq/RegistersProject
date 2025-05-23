@@ -6,8 +6,8 @@ import RegistersList from "../../Components/RegistersList";
 import UploadModal from "../../Modals/UploadModal";
 import { validateToken } from "../../Api/validateAuth";
 import { fetchRegistries } from "../../Api/Registries/getRegistry";
-import { fetchUserRegistries } from "../../Api/getAvailableRegistries";
-import { getUploadedRegistries } from "../../Api/getUploadedRegistries";
+import { fetchUserRegistries } from "../../Api/Registries/getAvailableRegistries";
+import { getUploadedRegistries } from "../../Api/Registries/getUploadedRegistries";
 import { parseJwt } from "../../Utils/parseJwt";
 
 import styles from "./styles";
