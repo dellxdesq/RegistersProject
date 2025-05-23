@@ -33,8 +33,6 @@ export default function RequestedAccessModal({ isOpen, onClose }) {
 
     if (!isOpen) return null;
     
-    
-
     return (
         <div style={styles.overlay}>
             <div style={styles.modal}>

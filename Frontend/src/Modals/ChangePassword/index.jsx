@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { changePassword } from "../../Api/changeUserPassword";
+import { changePassword } from "../../Api/Users/changeUserPassword";
 import styles from "./styles";
 
 export default function ChangePasswordModal({ onClose }) {

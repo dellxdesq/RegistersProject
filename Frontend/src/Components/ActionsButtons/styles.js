@@ -1,6 +1,19 @@
 const styles = {
+    page: {
+        display: "flex",
+        flexDirection: "column",
+        height: "100vh",
+        fontFamily: "Consolas",
+    },
+    
     actionsWrapper: {
         marginTop: "12px",
+    },
+    statusWrapper: {
+        display: "flex",
+        alignItems: "center",
+        gap: "15px",
+        marginBottom: "10px",
     },
     status: {
         fontWeight: "bold",
@@ -25,6 +38,15 @@ const styles = {
     },
     buttonHover: {
         background: "#2c3e9c",
+    },
+
+    deleteRequestButton: {
+        padding: "6px 12px",
+        backgroundColor: "#ff4d4f",
+        color: "white",
+        border: "none",
+        borderRadius: "4px",
+        cursor: "pointer",
     },
 };
 

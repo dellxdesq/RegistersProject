@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import styles from "./styles";
 import { useToast } from "../../Context/ToastContext";
 import RegisterForm from "../../Components/RegisterForm";
-import { registerUser } from "../../Api/registerUser";
+import { registerUser } from "../../Api/Users/registerUser";
 
 export default function RegisterPage() {
     const navigate = useNavigate();

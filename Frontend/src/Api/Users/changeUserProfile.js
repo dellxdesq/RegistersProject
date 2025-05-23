@@ -1,4 +1,4 @@
-import { authFetch } from "./authFetch";
+import { authFetch } from "../authFetch";
 export async function updateProfile(profileData) {
     try {
         const response = await authFetch("/auth/profile", {

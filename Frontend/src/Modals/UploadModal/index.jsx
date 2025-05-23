@@ -9,36 +9,20 @@ export default function UploadModal({ isOpen, onClose }) {
     const [file, setFile] = useState(null);
     const [description, setDescription] = useState("");
     const [organization, setOrganization] = useState("");
-    const [rowsCount, setRowsCount] = useState("");
-    const [fileFormat, setFileFormat] = useState("");
     const [accessLevel, setAccessLevel] = useState(1);
     const [selectedUsers, setSelectedUsers] = useState([]);
     const [currentUserInput, setCurrentUserInput] = useState("");
-
-
+    
     const handleFileChange = async (e) => {
         const selectedFile = e.target.files[0];
         setFile(selectedFile);
-
-        if (selectedFile) {
-            const format = getFileFormat(selectedFile);
-            setFileFormat(format);
-
-            try {
-                const rows = await countFileRows(selectedFile);
-                setRowsCount(rows);
-            } catch (error) {
-                console.error("Ошибка подсчета строк:", error);
-            }
-        }
     };
-
-
+    
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         try {
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('access_token');
 
             if (!token) {
                 alert('Токен не найден, авторизуйтесь!');
@@ -50,9 +34,7 @@ export default function UploadModal({ isOpen, onClose }) {
             const requestBody = {
                 name: title,
                 description: description,
-                fileFormat: fileFormat,
                 organization: organization,
-                rowsCount: Number(rowsCount),
                 defaultAccessLevel: accessLevel,
                 fileName: uploadResult.fileName,
                 userLoginsWithAccess: selectedUsers,

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import styles from "./styles";
 import { useToast } from "../../Context/ToastContext";
 import LoginForm from "../../Components/LoginForm";
-import { loginUser } from "../../Api/loginUser";
+import { loginUser } from "../../Api/Users/loginUser";
 import {useAuth} from "../../Context/AuthContext";
 
 export default function LoginPage() {

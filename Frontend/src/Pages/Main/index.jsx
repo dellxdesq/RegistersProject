@@ -5,7 +5,7 @@ import SearchList from "../../Components/SearchList";
 import RegistersList from "../../Components/RegistersList";
 import UploadModal from "../../Modals/UploadModal";
 import { validateToken } from "../../Api/validateAuth";
-import { fetchRegistries } from "../../Api/getRegistry";
+import { fetchRegistries } from "../../Api/Registries/getRegistry";
 import { fetchUserRegistries } from "../../Api/getAvailableRegistries";
 import { getUploadedRegistries } from "../../Api/getUploadedRegistries";
 import { parseJwt } from "../../Utils/parseJwt";

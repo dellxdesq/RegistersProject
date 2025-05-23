@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import styles from "../PersonalInfo/styles";
-import { getProfile } from "../../Api/getUserProfileInfo";
-import { updateProfile } from "../../Api/changeUserProfile";
+import { getProfile } from "../../Api/Users/getUserProfileInfo";
+import { updateProfile } from "../../Api/Users/changeUserProfile";
 import ChangePasswordModal from "../../Modals/ChangePassword"
-import {logout} from "../../Api/logoutUser"
+import {logout} from "../../Api/Users/logoutUser"
 import {useAuth} from "../../Context/AuthContext";
 export default function PersonalInfo({ onChangePassword, onLogout }) {
     const [formData, setFormData] = useState({

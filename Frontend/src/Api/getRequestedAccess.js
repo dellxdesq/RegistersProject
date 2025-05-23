@@ -1,7 +1,6 @@
 import { authFetch } from "./authFetch";
 export async function getRequestedAccess() {
     try {
-        const token = localStorage.getItem("access_token");
         const response = await authFetch("/registries/requests-access", {
             method: "GET",
         });
@@ -11,10 +10,12 @@ export async function getRequestedAccess() {
         }
 
         const data = await response.json();
-        return data.map(({ username, registryName, requestId }) => ({
+        return data.map(({ username, userId, registryName, requestId, registryId }) => ({
             username,
+            userId,
             registryName,
-            requestId
+            requestId,
+            registryId
         }));
     } catch (error) {
         console.error("Ошибка:", error);
