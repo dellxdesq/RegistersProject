@@ -509,5 +509,90 @@ namespace FileAnalyzerService.Services
                     throw new NotSupportedException($"Extension {dto.Extension} not supported.");
             }
         }
+
+        public async Task<FileFullContentDto> GetSlicedTempContentAsync(string fileName)
+        {
+            string extension = fileName.Split('.')[1];
+            var tempDir = Path.Combine(Path.GetTempPath(), "file_slices");
+            var tempFilePath = Path.Combine(tempDir, $"{fileName}_slice.{extension}");
+
+            if (!File.Exists(tempFilePath))
+                throw new FileNotFoundException("Slice file not found", tempFilePath);
+
+            switch (extension.ToLower())
+            {
+                case "csv":
+                    var lines = await File.ReadAllLinesAsync(tempFilePath);
+                    var columns = lines.First().Split(',').ToList();
+                    var rows = lines.Skip(1).Select(line => line.Split(',').ToList()).ToList();
+                    return new FileFullContentDto
+                    {
+                        FileName = fileName,
+                        Extension = extension,
+                        Columns = columns,
+                        Rows = rows
+                    };
+
+                case "json":
+                    using (var stream = File.OpenRead(tempFilePath))
+                    {
+                        var doc = await JsonSerializer.DeserializeAsync<JsonElement>(stream);
+                        var cols = doc.GetProperty("Columns").EnumerateArray().Select(c => c.GetString()).ToList();
+                        var rowsJson = doc.GetProperty("Rows").EnumerateArray();
+                        var parsedRows = rowsJson.Select(row => row.EnumerateArray().Select(cell => cell.GetString()).ToList()).ToList();
+
+                        return new FileFullContentDto
+                        {
+                            FileName = fileName,
+                            Extension = extension,
+                            Columns = cols,
+                            Rows = parsedRows
+                        };
+                    }
+
+                case "xml":
+                    var xdoc = XDocument.Load(tempFilePath);
+                    var firstRow = xdoc.Root.Elements("Row").First();
+                    var colsXml = firstRow.Elements().Select(e => e.Name.LocalName).ToList();
+                    var rowsXml = xdoc.Root.Elements("Row")
+                        .Select(row => colsXml.Select(col => row.Element(col)?.Value ?? "").ToList())
+                        .ToList();
+
+                    return new FileFullContentDto
+                    {
+                        FileName = fileName,
+                        Extension = extension,
+                        Columns = colsXml,
+                        Rows = rowsXml
+                    };
+
+                case "xlsx":
+                case "xls":
+                    using (var workbook = new XLWorkbook(tempFilePath))
+                    {
+                        var ws = workbook.Worksheet(1);
+                        var colCount = ws.Row(1).CellsUsed().Count();
+                        var rowCount = ws.LastRowUsed().RowNumber();
+
+                        var colNames = Enumerable.Range(1, colCount).Select(i => ws.Cell(1, i).GetString()).ToList();
+                        var rowData = new List<List<string>>();
+                        for (int i = 2; i <= rowCount; i++)
+                        {
+                            rowData.Add(Enumerable.Range(1, colCount).Select(j => ws.Cell(i, j).GetString()).ToList());
+                        }
+
+                        return new FileFullContentDto
+                        {
+                            FileName = fileName,
+                            Extension = extension,
+                            Columns = colNames,
+                            Rows = rowData
+                        };
+                    }
+
+                default:
+                    throw new NotSupportedException($"Extension {extension} not supported.");
+            }
+        }
     }
 }

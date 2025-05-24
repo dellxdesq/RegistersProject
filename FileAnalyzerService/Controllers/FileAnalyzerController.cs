@@ -53,5 +53,12 @@ namespace FileAnalyzerService.Controllers
             await _fileAnalyzerService.ApplySliceAndSaveTempAsync(fileName, request);
             return Ok();
         }
+
+        [HttpGet("{fileName}/slice/view")]
+        public async Task<IActionResult> ViewSlice(string fileName)
+        {
+            var result = await _fileAnalyzerService.GetSlicedTempContentAsync(fileName);
+            return Ok(result);
+        }
     }
 }
