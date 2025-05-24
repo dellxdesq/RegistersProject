@@ -5,6 +5,7 @@ using System.Xml;
 using ClosedXML.Excel;
 using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
+using System.Xml.Linq;
 
 namespace FileAnalyzerService.Services
 {
@@ -365,39 +366,6 @@ namespace FileAnalyzerService.Services
             return (columns, allRows);
         }
 
-        //public FileSliceResult ApplySlice(ParsedTable table, FileSliceRequest request)
-        //{
-        //    var selectedRows = table.Rows;
-
-        //    if (request.Filters != null)
-        //    {
-        //        foreach (var filter in request.Filters)
-        //        {
-        //            selectedRows = selectedRows
-        //                .Where(row => row[filter.Key]?.ToString() == filter.Value)
-        //                .ToList();
-        //        }
-        //    }
-
-        //    if (request.Columns != null && request.Columns.Any())
-        //    {
-        //        selectedRows = selectedRows
-        //            .Select(row => row
-        //                .Where(kv => request.Columns.Contains(kv.Key))
-        //                .ToDictionary(kv => kv.Key, kv => kv.Value))
-        //            .ToList();
-        //    }
-
-        //    if (request.Limit.HasValue)
-        //        selectedRows = selectedRows.Take(request.Limit.Value).ToList();
-
-        //    return new FileSliceResult
-        //    {
-        //        Columns = request.Columns ?? table.Columns,
-        //        Data = selectedRows
-        //    };
-        //}
-
         //public async Task<FileSliceResult> GetSliceAsync(string fileName, FileSliceRequest request)
         //{
         //    var extension = Path.GetExtension(fileName).ToLowerInvariant();
@@ -417,10 +385,15 @@ namespace FileAnalyzerService.Services
         //            throw new NotSupportedException($"Unsupported file format: {extension}");
         //    }
         //}
+        public async Task ApplySliceAndSaveTempAsync(string fileName, FileSliceRequest request)
+        {
+            var result = await ApplySliceAsync(fileName, request);
+            await SaveFileSliceToTempAsync(result);
+        }
 
         public async Task<FileFullContentDto> ApplySliceAsync(string fileName, FileSliceRequest request)
         {
-            var full = await GetFullContentAsync(fileName); // то, что ты уже сделал
+            var full = await GetFullContentAsync(fileName);
             var filteredRows = full.Rows;
 
             // 1. Фильтрация
@@ -480,6 +453,61 @@ namespace FileAnalyzerService.Services
                 Columns = full.Columns,
                 Rows = filteredRows
             };
+        }
+
+        public async Task SaveFileSliceToTempAsync(FileFullContentDto dto)
+        {
+            var tempDir = Path.Combine(Path.GetTempPath(), "file_slices");
+            Directory.CreateDirectory(tempDir);
+
+            var tempFilePath = Path.Combine(tempDir, $"{dto.FileName}_slice.{dto.Extension}");
+
+            switch (dto.Extension.ToLower())
+            {
+                case "csv":
+                    var csv = string.Join('\n', new[] { string.Join(",", dto.Columns) }
+                        .Concat(dto.Rows.Select(row => string.Join(",", row))));
+                    await File.WriteAllTextAsync(tempFilePath, csv);
+                    break;
+
+                case "json":
+                    var json = JsonSerializer.Serialize(new
+                    {
+                        Columns = dto.Columns,
+                        Rows = dto.Rows
+                    }, new JsonSerializerOptions { WriteIndented = true });
+                    await File.WriteAllTextAsync(tempFilePath, json);
+                    break;
+
+                case "xml":
+                    var xmlDoc = new XDocument(
+                        new XElement("Root",
+                            dto.Rows.Select(row =>
+                                new XElement("Row",
+                                    dto.Columns.Select((col, i) =>
+                                        new XElement(col, row[i]))))));
+                    await File.WriteAllTextAsync(tempFilePath, xmlDoc.ToString());
+                    break;
+
+                case "xlsx":
+                case "xls":
+                    using (var workbook = new XLWorkbook())
+                    {
+                        var ws = workbook.Worksheets.Add("Slice");
+                        for (int i = 0; i < dto.Columns.Count; i++)
+                            ws.Cell(1, i + 1).Value = dto.Columns[i];
+
+                        for (int r = 0; r < dto.Rows.Count; r++)
+                            for (int c = 0; c < dto.Columns.Count; c++)
+                                ws.Cell(r + 2, c + 1).Value = dto.Rows[r][c];
+
+                        workbook.SaveAs(tempFilePath);
+                    }
+                    break;
+
+                default:
+                    throw new NotSupportedException($"Extension {dto.Extension} not supported.");
+            }
         }
     }
 }

@@ -38,12 +38,20 @@ namespace FileAnalyzerService.Controllers
             return Ok(result);
         }
 
+        //[HttpPost("{fileName}/slice")]
+        //public async Task<IActionResult> Slice(string fileName, [FromBody] FileSliceRequest request)
+        //{
+        //    //var result = await _fileAnalyzerService.GetSliceAsync(fileName, request);
+        //    var result = await _fileAnalyzerService.ApplySliceAsync(fileName, request);
+        //    return Ok(result);
+        //}
+
+        //сделать срез и сохранить во временное хранилище
         [HttpPost("{fileName}/slice")]
         public async Task<IActionResult> Slice(string fileName, [FromBody] FileSliceRequest request)
         {
-            //var result = await _fileAnalyzerService.GetSliceAsync(fileName, request);
-            var result = await _fileAnalyzerService.ApplySliceAsync(fileName, request);
-            return Ok(result);
+            await _fileAnalyzerService.ApplySliceAndSaveTempAsync(fileName, request);
+            return Ok();
         }
     }
 }
