@@ -42,6 +42,8 @@ builder.Services.AddAuthorization();
 
 builder.WebHost.ConfigureKestrel(options =>
 {
+    
+    options.Limits.MaxRequestBodySize = 50_000_000; //можно грузануть файл до 50 мб
     options.ListenAnyIP(8080);
     options.ListenAnyIP(8081, listenOptions =>
     {

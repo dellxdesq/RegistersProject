@@ -16,6 +16,7 @@ namespace StorageService.Controllers
         }
         [Authorize]
         [HttpPost("upload")]
+        [RequestSizeLimit(104857600)] //поставленный в ручную лимит
         public async Task<IActionResult> Upload(IFormFile file)
         {
             var fileName = await _minioService.UploadFileAsync(file);

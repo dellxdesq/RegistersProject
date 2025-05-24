@@ -108,7 +108,7 @@ export default function RegistryPage() {
                 <div style={styles.content}>
                     <RegistryInfo info={info} onShowFull={handleShowFull} />
                     <RegistryTable data={tableData} />
-                    <RegistryActions registryId={id} />
+                    <RegistryActions registryId={id} accessLevel={info.defaultAccessLevel} />
                 </div>
             </div>
         </div>

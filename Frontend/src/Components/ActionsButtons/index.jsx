@@ -9,7 +9,7 @@ import { deleteAccessRequest } from "../../Api/Accesses/deleteAccessRequest";
 import { getRequestedAccess } from "../../Api/Accesses/getRequestedAccess";
 import {parseJwt} from "../../Utils/parseJwt";
 
-export default function RegistryActions({registryId }) {
+export default function RegistryActions({registryId, accessLevel }) {
     const [hovered, setHovered] = useState(null);
     const [isSlicesOpen, setIsSlicesOpen] = useState(false);
     const [isCreateSliceOpen, setIsCreateSliceOpen] = useState(false);
@@ -98,13 +98,23 @@ export default function RegistryActions({registryId }) {
         <>
             <div style={styles.actionsWrapper}>
                 <div style={styles.statusWrapper}>
-                    <div style={styles.status}>Доступ: Требуется запрос</div>
+                    <div style={styles.status}>
+                        Доступ: {
+                        accessLevel === 1
+                            ? "Публичный"
+                            : accessLevel === 2
+                                ? "Требуется доступ"
+                                : accessLevel === 3
+                                    ? "Внутри организации"
+                                    : "Неизвестно"
+                    }
+                    </div>
                     {requestId && (
                         <button
                             style={styles.deleteRequestButton}
                             onClick={handleDeleteRequest}
                         >
-                            Удалить запрос
+                        Удалить запрос
                         </button>
                     )}
                 </div>
