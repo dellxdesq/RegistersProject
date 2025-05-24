@@ -1,3 +1,4 @@
+using FileAnalyzerService.Models.Dto;
 using FileAnalyzerService.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -34,6 +35,14 @@ namespace FileAnalyzerService.Controllers
         public async Task<IActionResult> FullContent(string fileName)
         {
             var result = await _fileAnalyzerService.GetFullContentAsync(fileName);
+            return Ok(result);
+        }
+
+        [HttpPost("{fileName}/slice")]
+        public async Task<IActionResult> Slice(string fileName, [FromBody] FileSliceRequest request)
+        {
+            //var result = await _fileAnalyzerService.GetSliceAsync(fileName, request);
+            var result = await _fileAnalyzerService.ApplySliceAsync(fileName, request);
             return Ok(result);
         }
     }

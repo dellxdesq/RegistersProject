@@ -364,5 +364,122 @@ namespace FileAnalyzerService.Services
             var allRows = dataRows.Select(RowToString).ToList();
             return (columns, allRows);
         }
+
+        //public FileSliceResult ApplySlice(ParsedTable table, FileSliceRequest request)
+        //{
+        //    var selectedRows = table.Rows;
+
+        //    if (request.Filters != null)
+        //    {
+        //        foreach (var filter in request.Filters)
+        //        {
+        //            selectedRows = selectedRows
+        //                .Where(row => row[filter.Key]?.ToString() == filter.Value)
+        //                .ToList();
+        //        }
+        //    }
+
+        //    if (request.Columns != null && request.Columns.Any())
+        //    {
+        //        selectedRows = selectedRows
+        //            .Select(row => row
+        //                .Where(kv => request.Columns.Contains(kv.Key))
+        //                .ToDictionary(kv => kv.Key, kv => kv.Value))
+        //            .ToList();
+        //    }
+
+        //    if (request.Limit.HasValue)
+        //        selectedRows = selectedRows.Take(request.Limit.Value).ToList();
+
+        //    return new FileSliceResult
+        //    {
+        //        Columns = request.Columns ?? table.Columns,
+        //        Data = selectedRows
+        //    };
+        //}
+
+        //public async Task<FileSliceResult> GetSliceAsync(string fileName, FileSliceRequest request)
+        //{
+        //    var extension = Path.GetExtension(fileName).ToLowerInvariant();
+
+        //    switch (extension)
+        //    {
+        //        case ".csv":
+        //            return await _csvProcessor.ApplySliceAsync(fileName, request);
+        //        case ".xlsx":
+        //        case ".xls":
+        //            return await _excelProcessor.ApplySliceAsync(fileName, request);
+        //        case ".json":
+        //            return await _jsonProcessor.ApplySliceAsync(fileName, request);
+        //        case ".xml":
+        //            return await _xmlProcessor.ApplySliceAsync(fileName, request);
+        //        default:
+        //            throw new NotSupportedException($"Unsupported file format: {extension}");
+        //    }
+        //}
+
+        public async Task<FileFullContentDto> ApplySliceAsync(string fileName, FileSliceRequest request)
+        {
+            var full = await GetFullContentAsync(fileName); // то, что ты уже сделал
+            var filteredRows = full.Rows;
+
+            // 1. Фильтрация
+            if (request.Filters != null && request.Filters.Any())
+            {
+                var colIndex = full.Columns
+                    .Select((col, idx) => new { col, idx })
+                    .ToDictionary(x => x.col, x => x.idx);
+
+                foreach (var filter in request.Filters)
+                {
+                    if (!colIndex.TryGetValue(filter.Column, out var i)) continue;
+                    filteredRows = filteredRows.Where(row =>
+                    {
+                        if (row.Count <= i) return false;
+                        var cell = row[i];
+
+                        if (!double.TryParse(cell, out var cellNum)) return cell == filter.Value;
+
+                        if (!double.TryParse(filter.Value, out var filterNum)) return false;
+
+                        return filter.Op switch
+                        {
+                            ">" => cellNum > filterNum,
+                            "<" => cellNum < filterNum,
+                            ">=" => cellNum >= filterNum,
+                            "<=" => cellNum <= filterNum,
+                            "!=" => cellNum != filterNum,
+                            _ => cellNum == filterNum,
+                        };
+                    }).ToList();
+                }
+            }
+
+            // 2. Выбор колонок
+            if (request.Columns != null && request.Columns.Any())
+            {
+                var colIndexes = full.Columns
+                    .Select((col, idx) => new { col, idx })
+                    .Where(x => request.Columns.Contains(x.col))
+                    .ToList();
+
+                full.Columns = colIndexes.Select(x => x.col).ToList();
+                filteredRows = filteredRows
+                    .Select(row => colIndexes.Select(x => row[x.idx]).ToList())
+                    .ToList();
+            }
+
+            // 3. Ограничение по количеству строк
+            if (request.Limit.HasValue)
+                filteredRows = filteredRows.Take(request.Limit.Value).ToList();
+
+            return new FileFullContentDto
+            {
+                FileName = fileName,
+                Extension = full.Extension,
+                Columns = full.Columns,
+                Rows = filteredRows
+            };
+        }
     }
 }

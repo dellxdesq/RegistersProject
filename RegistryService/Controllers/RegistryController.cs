@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using RegistryService.Models;
 using RegistryService.Models.Dto;
 using RegistryServiceProject.Models.Dto;
 using RegistryServiceProject.Services;
 using System.Security.Claims;
+using System.Text.Json;
 
 namespace RegistryServiceProject.Controllers
 {
@@ -256,7 +258,7 @@ namespace RegistryServiceProject.Controllers
 
             return Ok(true);
         }
-        
+
         //удалить запрос
         [Authorize]
         [HttpDelete("access-requests/{id}")]
@@ -269,6 +271,23 @@ namespace RegistryServiceProject.Controllers
                 return NotFound("Запрос не найден");
 
             return Ok();
+        }
+
+        [Authorize]
+        [HttpPost("{registryId}/slice/save")]
+        public async Task<IActionResult> SaveSlice(int registryId, [FromBody] SaveSliceRequestDto dto)
+        {
+            var entity = new RegistrySlice
+            {
+                RegistryId = registryId,
+                Name = dto.Name,
+                FileName = dto.FileName,
+                SliceDefinitionJson = JsonSerializer.Serialize(dto.Request)
+            };
+
+            await _registryService.SaveSliceAsync(entity);
+
+            return Ok(entity.Id);
         }
 
     }

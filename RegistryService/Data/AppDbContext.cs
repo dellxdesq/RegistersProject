@@ -12,6 +12,7 @@ namespace RegistryServiceProject.Data
         public DbSet<UserRegistryAccess> UserRegistryAccesses { get; set; }
         public DbSet<RegistryAccessRequest> RegistryAccessRequests { get; set; }
         public DbSet<RegistryMeta> RegistryMetas { get; set; }
+        public DbSet<RegistrySlice> RegistrySlices { get; set; }
         public DbSet<RegistrySliceRequest> RegistrySliceRequests { get; set; }
 
 
@@ -43,6 +44,13 @@ namespace RegistryServiceProject.Data
                 .WithMany()
                 .HasForeignKey(r => r.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            //Связь срезов и реестров
+            modelBuilder.Entity<RegistrySlice>()
+                .HasOne<Registry>()
+                .WithMany()
+                .HasForeignKey(s => s.RegistryId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

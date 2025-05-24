@@ -2,22 +2,25 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RegistryServiceProject.Data;
 
 #nullable disable
 
-namespace RegistryService.Migrations
+namespace RegistryService.Data
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250524203717_AddRegistrySliceTable")]
+    partial class AddRegistrySliceTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.5")
+                .HasAnnotation("ProductVersion", "9.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -117,6 +120,36 @@ namespace RegistryService.Migrations
                         .IsUnique();
 
                     b.ToTable("RegistryMetas");
+                });
+
+            modelBuilder.Entity("RegistryService.Models.RegistrySlice", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("RegistryId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("SliceDefinitionJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RegistryId");
+
+                    b.ToTable("RegistrySlices");
                 });
 
             modelBuilder.Entity("RegistryService.Models.RegistrySliceRequest", b =>
@@ -253,6 +286,15 @@ namespace RegistryService.Migrations
                         .IsRequired();
 
                     b.Navigation("Registry");
+                });
+
+            modelBuilder.Entity("RegistryService.Models.RegistrySlice", b =>
+                {
+                    b.HasOne("RegistryService.Models.Registry", null)
+                        .WithMany()
+                        .HasForeignKey("RegistryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("RegistryService.Models.RegistrySliceRequest", b =>

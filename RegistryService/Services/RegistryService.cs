@@ -387,6 +387,12 @@ namespace RegistryServiceProject.Services
             return true;
         }
 
+        public async Task SaveSliceAsync(RegistrySlice slice)
+        {
+            _db.RegistrySlices.Add(slice);
+            await _db.SaveChangesAsync();
+        }
+
 
     }
 }
