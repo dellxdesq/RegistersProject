@@ -13,6 +13,7 @@ const styles = {
     title: {
         fontSize: "24px",
         fontWeight: "bold",
+        marginTop: "1px",
         marginBottom: "20px",
         textAlign: "center",
     },
@@ -30,18 +31,7 @@ const styles = {
         padding: "10px",
         borderRadius: "8px",
     },
-    fullViewButton: {
-        position: "absolute",
-        top: "10px",
-        right: "10px",
-        padding: "6px 12px",
-        fontSize: "14px",
-        backgroundColor: "#007bff",
-        color: "white",
-        border: "none",
-        borderRadius: "4px",
-        cursor: "pointer",
-    },
+    
 };
 
 export default styles;

@@ -6,6 +6,7 @@ import PersonalPage from "./Pages/Personal";
 import {ToastProvider} from "./Context/ToastContext";
 import RegistryPage from "./Pages/Registry";
 import Slice from "./Pages/Slice";
+import ChartViewer from "./Pages/ChartView";
 function App() {
     return (
         <Router>
@@ -17,6 +18,7 @@ function App() {
                     <Route path="/personal" element={<PersonalPage />} />
                     <Route path="/registry/:id" element={<RegistryPage />} />
                     <Route path="/slice/:id" element={<Slice />} />
+                    <Route path="/chart-viewer" element={<ChartViewer />} />
                 </Routes>
             </ToastProvider>
         </Router>

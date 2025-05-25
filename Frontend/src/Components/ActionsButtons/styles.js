@@ -7,13 +7,13 @@ const styles = {
     },
     
     actionsWrapper: {
-        marginTop: "12px",
+        
     },
     statusWrapper: {
         display: "flex",
         alignItems: "center",
         gap: "15px",
-        marginBottom: "10px",
+        
     },
     status: {
         fontWeight: "bold",
@@ -23,23 +23,15 @@ const styles = {
     buttonGroup: {
         display: "flex",
         justifyContent: "space-between",
-        gap: "12px",
-    },
-    button: {
-        flex: 1,
-        padding: "12px",
-        border: "none",
-        background: "#61bbfb",
-        color: "black",
-        borderRadius: "8px",
-        fontSize: "14px",
-        cursor: "pointer",
-        transition: "background 0.3s",
-    },
-    buttonHover: {
-        background: "#2c3e9c",
+        marginTop: "-15px",
+        gap: "40px",
+        
     },
 
+    disabledButton: {
+        color: "#aaa",
+        cursor: "not-allowed",
+    },
     deleteRequestButton: {
         padding: "6px 12px",
         backgroundColor: "#ff4d4f",
@@ -48,6 +40,19 @@ const styles = {
         borderRadius: "4px",
         cursor: "pointer",
     },
+
+    iconButton: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: "40px",
+        height: "40px",
+        borderRadius: "15px",
+        fontSize: "18px",
+        cursor: "pointer",
+    }
+
+
 };
 
 export default styles;

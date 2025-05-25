@@ -4,7 +4,7 @@ const styles = {
         border: "1px solid #ccc",
         borderRadius: 8,
         backgroundColor: "#fff",
-        maxHeight: "250px",
+        maxHeight: "420px",
     },
     table: {
         width: "100%",
