@@ -14,26 +14,29 @@ namespace FileAnalyzerService.Services
     {
 
 
-        private readonly HttpClient _http;
+        //private readonly HttpClient _http;
+        private readonly IStorageClient _storageClient;
         //private readonly IConfiguration _config;
         private readonly AppDbContext _db;
 
-        public FileAnalyzerService(AppDbContext db, HttpClient http, IConfiguration config)
+        public FileAnalyzerService(AppDbContext db, HttpClient http, IStorageClient storage/*IConfiguration config*/)
         {
             _db = db;
-            _http = http;
+            _storageClient = storage; 
+            //_http = http;
             //_config = config;
         }
 
         public async Task<FileAnalysisDto> AnalyzeAsync(string fileName)
         {
             var ext = Path.GetExtension(fileName).ToLowerInvariant().Trim('.');
-            var storageUrl = $"http://localhost:5002/api/v1/storage/download-link/{fileName}";
-            var resp = await _http.GetFromJsonAsync<DownloadUrlDto>(storageUrl);
-            if (resp?.Url == null)
-                throw new Exception("Не удалось получить ссылку на скачивание");
+            //var storageUrl = $"http://localhost:5002/api/v1/storage/download-link/{fileName}";
+            //var resp = await _http.GetFromJsonAsync<DownloadUrlDto>(storageUrl);
+            //if (resp?.Url == null)
+            //    throw new Exception("Не удалось получить ссылку на скачивание");
 
-            var stream = await _http.GetStreamAsync(resp.Url);
+            //var stream = await _http.GetStreamAsync(resp.Url);
+            var stream = await _storageClient.GetFileStreamAsync(fileName);
             int rows = ext switch
             {
                 "csv" => await CountCsvLinesAsync(stream),
@@ -94,12 +97,13 @@ namespace FileAnalyzerService.Services
         public async Task<FilePreviewDto> GetPreviewAsync(string fileName)
         {
             var ext = Path.GetExtension(fileName).ToLowerInvariant().Trim('.');
-            var storageUrl = $"http://localhost:5002/api/v1/storage/download-link/{fileName}";
-            var resp = await _http.GetFromJsonAsync<DownloadUrlDto>(storageUrl);
-            if (resp?.Url == null)
-                throw new Exception("Не удалось получить ссылку на скачивание");
+            //var storageUrl = $"http://localhost:5002/api/v1/storage/download-link/{fileName}";
+            //var resp = await _http.GetFromJsonAsync<DownloadUrlDto>(storageUrl);
+            //if (resp?.Url == null)
+            //    throw new Exception("Не удалось получить ссылку на скачивание");
 
-            var stream = await _http.GetStreamAsync(resp.Url);
+            //var stream = await _http.GetStreamAsync(resp.Url);
+            var stream = await _storageClient.GetFileStreamAsync(fileName);
 
             (List<string> columns, List<List<string>> first, List<List<string>> last) = ext switch
             {
@@ -241,12 +245,13 @@ namespace FileAnalyzerService.Services
         public async Task<FileFullContentDto> GetFullContentAsync(string fileName)
         {
             var ext = Path.GetExtension(fileName).ToLowerInvariant().Trim('.');
-            var storageUrl = $"http://localhost:5002/api/v1/storage/download-link/{fileName}";
-            var resp = await _http.GetFromJsonAsync<DownloadUrlDto>(storageUrl);
-            if (resp?.Url == null)
-                throw new Exception("Не удалось получить ссылку на скачивание");
+            //var storageUrl = $"http://localhost:5002/api/v1/storage/download-link/{fileName}";
+            //var resp = await _http.GetFromJsonAsync<DownloadUrlDto>(storageUrl);
+            //if (resp?.Url == null)
+            //    throw new Exception("Не удалось получить ссылку на скачивание");
 
-            var stream = await _http.GetStreamAsync(resp.Url);
+            //var stream = await _http.GetStreamAsync(resp.Url);
+            var stream = await _storageClient.GetFileStreamAsync(fileName);
 
             (List<string> columns, List<List<string>> rows) = ext switch
             {
@@ -526,7 +531,7 @@ namespace FileAnalyzerService.Services
             workbook.SaveAs(path);
         }
 
-        //Прочесть временный файл
+        //Прочесть временный файл 
         public async Task<FileFullContentDto> GetSlicedTempContentAsync(string fileName)
         {
             string extension = fileName.Split('.')[1];
@@ -621,16 +626,8 @@ namespace FileAnalyzerService.Services
             if (sliceFilePath == null)
                 throw new FileNotFoundException("Slice file not found.");
 
-            using var httpClient = new HttpClient();
-
-            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
-
             using var fileStream = File.OpenRead(sliceFilePath);
-            using var content = new MultipartFormDataContent();
-            content.Add(new StreamContent(fileStream), "file", Path.GetFileName(sliceFilePath));
-
-            var response = await httpClient.PostAsync("http://localhost:5002/api/v1/storage/upload", content);
-            response.EnsureSuccessStatusCode();
+            await _storageClient.UploadFileAsync(fileStream, Path.GetFileName(sliceFilePath), jwtToken);
         }
     }
 }
