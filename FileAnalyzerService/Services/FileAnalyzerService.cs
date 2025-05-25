@@ -456,6 +456,7 @@ namespace FileAnalyzerService.Services
             };
         }
 
+        //Сохраняет срез во временное хранилище
         public async Task SaveFileSliceToTempAsync(FileFullContentDto dto)
         {
             var tempDir = Path.Combine(Path.GetTempPath(), "file_slices");
@@ -466,49 +467,63 @@ namespace FileAnalyzerService.Services
             switch (dto.Extension.ToLower())
             {
                 case "csv":
-                    var csv = string.Join('\n', new[] { string.Join(",", dto.Columns) }
-                        .Concat(dto.Rows.Select(row => string.Join(",", row))));
-                    await File.WriteAllTextAsync(tempFilePath, csv);
+                    await SaveCsvAsync(dto, tempFilePath);
                     break;
-
                 case "json":
-                    var json = JsonSerializer.Serialize(new
-                    {
-                        Columns = dto.Columns,
-                        Rows = dto.Rows
-                    }, new JsonSerializerOptions { WriteIndented = true });
-                    await File.WriteAllTextAsync(tempFilePath, json);
+                    await SaveJsonAsync(dto, tempFilePath);
                     break;
-
                 case "xml":
-                    var xmlDoc = new XDocument(
-                        new XElement("Root",
-                            dto.Rows.Select(row =>
-                                new XElement("Row",
-                                    dto.Columns.Select((col, i) =>
-                                        new XElement(col, row[i]))))));
-                    await File.WriteAllTextAsync(tempFilePath, xmlDoc.ToString());
+                    await SaveXmlAsync(dto, tempFilePath);
                     break;
-
                 case "xlsx":
                 case "xls":
-                    using (var workbook = new XLWorkbook())
-                    {
-                        var ws = workbook.Worksheets.Add("Slice");
-                        for (int i = 0; i < dto.Columns.Count; i++)
-                            ws.Cell(1, i + 1).Value = dto.Columns[i];
-
-                        for (int r = 0; r < dto.Rows.Count; r++)
-                            for (int c = 0; c < dto.Columns.Count; c++)
-                                ws.Cell(r + 2, c + 1).Value = dto.Rows[r][c];
-
-                        workbook.SaveAs(tempFilePath);
-                    }
+                    SaveExcel(dto, tempFilePath);
                     break;
-
                 default:
                     throw new NotSupportedException($"Extension {dto.Extension} not supported.");
             }
+        }
+
+        private async Task SaveCsvAsync(FileFullContentDto dto, string path)
+        {
+            var csv = string.Join('\n', new[] { string.Join(",", dto.Columns) }
+                .Concat(dto.Rows.Select(row => string.Join(",", row))));
+            await File.WriteAllTextAsync(path, csv);
+        }
+
+        private async Task SaveJsonAsync(FileFullContentDto dto, string path)
+        {
+            var rowObjects = dto.Rows.Select(row =>
+                dto.Columns.Select((col, i) => new { col, val = row[i] })
+                           .ToDictionary(x => x.col, x => x.val));
+            var json = JsonSerializer.Serialize(rowObjects, new JsonSerializerOptions { WriteIndented = true });
+            await File.WriteAllTextAsync(path, json);
+        }
+
+        private async Task SaveXmlAsync(FileFullContentDto dto, string path)
+        {
+            var xmlDoc = new XDocument(
+                new XElement("records",
+                    dto.Rows.Select(row =>
+                        new XElement("record",
+                            dto.Columns.Select((col, i) =>
+                                new XElement(col, row[i]))))));
+            await File.WriteAllTextAsync(path, xmlDoc.ToString());
+        }
+
+        private void SaveExcel(FileFullContentDto dto, string path)
+        {
+            using var workbook = new XLWorkbook();
+            var ws = workbook.Worksheets.Add("Slice");
+
+            for (int i = 0; i < dto.Columns.Count; i++)
+                ws.Cell(1, i + 1).Value = dto.Columns[i];
+
+            for (int r = 0; r < dto.Rows.Count; r++)
+                for (int c = 0; c < dto.Columns.Count; c++)
+                    ws.Cell(r + 2, c + 1).Value = dto.Rows[r][c];
+
+            workbook.SaveAs(path);
         }
 
         public async Task<FileFullContentDto> GetSlicedTempContentAsync(string fileName)
