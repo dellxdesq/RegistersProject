@@ -5,11 +5,14 @@ using RegistryServiceProject.Data;
 using RegistryServiceProject.Services;
 using System.Text;
 using System.IdentityModel.Tokens.Jwt;
+using RegistryService.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddHttpClient();
+builder.Services.AddHttpClient<IStorageClient, StorageClient>();
+builder.Services.AddHttpClient<IFileAnalyzerClient, FileAnalyzerClient>();
+//builder.Services.AddHttpClient();
 builder.Services.AddControllers();
 builder.Services.AddScoped<RegistryServiceProject.Services.RegistryService>();
 

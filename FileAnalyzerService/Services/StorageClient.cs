@@ -6,7 +6,7 @@ namespace FileAnalyzerService.Services
     public class StorageClient : IStorageClient
     {
         private readonly HttpClient _http;
-        private const string BaseUrl = "http://localhost:5002";
+        private const string BaseUrl = "http://localhost:5002/api/v1/storage";
 
         public StorageClient(HttpClient http)
         {
@@ -15,7 +15,7 @@ namespace FileAnalyzerService.Services
 
         public async Task<Stream> GetFileStreamAsync(string fileName)
         {
-            var storageUrl = $"{BaseUrl}/api/v1/storage/download-link/{fileName}";
+            var storageUrl = $"{BaseUrl}/download-link/{fileName}";
             var resp = await _http.GetFromJsonAsync<DownloadUrlDto>(storageUrl);
 
             if (resp?.Url == null)
@@ -29,7 +29,7 @@ namespace FileAnalyzerService.Services
             using var content = new MultipartFormDataContent();
             content.Add(new StreamContent(fileStream), "file", fileName);
 
-            var request = new HttpRequestMessage(HttpMethod.Post, $"{BaseUrl}/api/v1/storage/upload")
+            var request = new HttpRequestMessage(HttpMethod.Post, $"{BaseUrl}/upload")
             {
                 Content = content
             };

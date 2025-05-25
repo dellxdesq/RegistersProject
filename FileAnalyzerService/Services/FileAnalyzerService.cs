@@ -19,7 +19,7 @@ namespace FileAnalyzerService.Services
         //private readonly IConfiguration _config;
         private readonly AppDbContext _db;
 
-        public FileAnalyzerService(AppDbContext db, HttpClient http, IStorageClient storage/*IConfiguration config*/)
+        public FileAnalyzerService(AppDbContext db, /*HttpClient http,*/ IStorageClient storage/*IConfiguration config*/)
         {
             _db = db;
             _storageClient = storage; 
