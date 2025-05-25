@@ -6,6 +6,7 @@ using ClosedXML.Excel;
 using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
 using System.Xml.Linq;
+using System.Net.Http.Headers;
 
 namespace FileAnalyzerService.Services
 {
@@ -593,6 +594,30 @@ namespace FileAnalyzerService.Services
                 default:
                     throw new NotSupportedException($"Extension {extension} not supported.");
             }
+        }
+
+        public async Task UploadSliceToStorageServiceAsync(string fileName, string jwtToken)
+        {
+            var tempDir = Path.Combine(Path.GetTempPath(), "file_slices");
+
+            var extensions = new[] { ".csv", ".json", ".xml", ".xlsx", ".xls" };
+            var sliceFilePath = extensions
+                .Select(ext => Path.Combine(tempDir, $"{fileName}_slice{ext}"))
+                .FirstOrDefault(File.Exists);
+
+            if (sliceFilePath == null)
+                throw new FileNotFoundException("Slice file not found.");
+
+            using var httpClient = new HttpClient();
+
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
+
+            using var fileStream = File.OpenRead(sliceFilePath);
+            using var content = new MultipartFormDataContent();
+            content.Add(new StreamContent(fileStream), "file", Path.GetFileName(sliceFilePath));
+
+            var response = await httpClient.PostAsync("http://localhost:5002/api/v1/storage/upload", content);
+            response.EnsureSuccessStatusCode();
         }
     }
 }

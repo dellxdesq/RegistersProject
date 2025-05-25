@@ -60,5 +60,17 @@ namespace FileAnalyzerService.Controllers
             var result = await _fileAnalyzerService.GetSlicedTempContentAsync(fileName);
             return Ok(result);
         }
+
+        [HttpPost("{fileName}/slice/confirm")]
+        public async Task<IActionResult> ConfirmSlice(string fileName)
+        {
+            var token = HttpContext.Request.Headers["Authorization"].ToString();
+            if (token.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+            {
+                token = token.Substring("Bearer ".Length).Trim();
+            }
+            await _fileAnalyzerService.UploadSliceToStorageServiceAsync(fileName, token);
+            return Ok();
+        }
     }
 }
