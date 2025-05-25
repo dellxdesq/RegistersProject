@@ -8,3 +8,4 @@
 /backend/appsettings.Development.json
 *.env
 /RegistryService/Data/Migrations/AppDbContextModelSnapshot.cs
+/Frontend/obj/Debug/package.g.props
