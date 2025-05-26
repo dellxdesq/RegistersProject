@@ -14,26 +14,29 @@ namespace FileAnalyzerService.Services
     {
 
 
-        private readonly HttpClient _http;
+        //private readonly HttpClient _http;
+        private readonly IStorageClient _storageClient;
         //private readonly IConfiguration _config;
         private readonly AppDbContext _db;
 
-        public FileAnalyzerService(AppDbContext db, HttpClient http, IConfiguration config)
+        public FileAnalyzerService(AppDbContext db, /*HttpClient http,*/ IStorageClient storage/*IConfiguration config*/)
         {
             _db = db;
-            _http = http;
+            _storageClient = storage; 
+            //_http = http;
             //_config = config;
         }
 
         public async Task<FileAnalysisDto> AnalyzeAsync(string fileName)
         {
             var ext = Path.GetExtension(fileName).ToLowerInvariant().Trim('.');
-            var storageUrl = $"http://localhost:5002/api/v1/storage/download-link/{fileName}";
-            var resp = await _http.GetFromJsonAsync<DownloadUrlDto>(storageUrl);
-            if (resp?.Url == null)
-                throw new Exception("Не удалось получить ссылку на скачивание");
+            //var storageUrl = $"http://localhost:5002/api/v1/storage/download-link/{fileName}";
+            //var resp = await _http.GetFromJsonAsync<DownloadUrlDto>(storageUrl);
+            //if (resp?.Url == null)
+            //    throw new Exception("Не удалось получить ссылку на скачивание");
 
-            var stream = await _http.GetStreamAsync(resp.Url);
+            //var stream = await _http.GetStreamAsync(resp.Url);
+            var stream = await _storageClient.GetFileStreamAsync(fileName);
             int rows = ext switch
             {
                 "csv" => await CountCsvLinesAsync(stream),
@@ -94,12 +97,13 @@ namespace FileAnalyzerService.Services
         public async Task<FilePreviewDto> GetPreviewAsync(string fileName)
         {
             var ext = Path.GetExtension(fileName).ToLowerInvariant().Trim('.');
-            var storageUrl = $"http://localhost:5002/api/v1/storage/download-link/{fileName}";
-            var resp = await _http.GetFromJsonAsync<DownloadUrlDto>(storageUrl);
-            if (resp?.Url == null)
-                throw new Exception("Не удалось получить ссылку на скачивание");
+            //var storageUrl = $"http://localhost:5002/api/v1/storage/download-link/{fileName}";
+            //var resp = await _http.GetFromJsonAsync<DownloadUrlDto>(storageUrl);
+            //if (resp?.Url == null)
+            //    throw new Exception("Не удалось получить ссылку на скачивание");
 
-            var stream = await _http.GetStreamAsync(resp.Url);
+            //var stream = await _http.GetStreamAsync(resp.Url);
+            var stream = await _storageClient.GetFileStreamAsync(fileName);
 
             (List<string> columns, List<List<string>> first, List<List<string>> last) = ext switch
             {
@@ -241,12 +245,13 @@ namespace FileAnalyzerService.Services
         public async Task<FileFullContentDto> GetFullContentAsync(string fileName)
         {
             var ext = Path.GetExtension(fileName).ToLowerInvariant().Trim('.');
-            var storageUrl = $"http://localhost:5002/api/v1/storage/download-link/{fileName}";
-            var resp = await _http.GetFromJsonAsync<DownloadUrlDto>(storageUrl);
-            if (resp?.Url == null)
-                throw new Exception("Не удалось получить ссылку на скачивание");
+            //var storageUrl = $"http://localhost:5002/api/v1/storage/download-link/{fileName}";
+            //var resp = await _http.GetFromJsonAsync<DownloadUrlDto>(storageUrl);
+            //if (resp?.Url == null)
+            //    throw new Exception("Не удалось получить ссылку на скачивание");
 
-            var stream = await _http.GetStreamAsync(resp.Url);
+            //var stream = await _http.GetStreamAsync(resp.Url);
+            var stream = await _storageClient.GetFileStreamAsync(fileName);
 
             (List<string> columns, List<List<string>> rows) = ext switch
             {
@@ -456,6 +461,7 @@ namespace FileAnalyzerService.Services
             };
         }
 
+        //Сохраняет срез во временное хранилище
         public async Task SaveFileSliceToTempAsync(FileFullContentDto dto)
         {
             var tempDir = Path.Combine(Path.GetTempPath(), "file_slices");
@@ -466,134 +472,146 @@ namespace FileAnalyzerService.Services
             switch (dto.Extension.ToLower())
             {
                 case "csv":
-                    var csv = string.Join('\n', new[] { string.Join(",", dto.Columns) }
-                        .Concat(dto.Rows.Select(row => string.Join(",", row))));
-                    await File.WriteAllTextAsync(tempFilePath, csv);
+                    await SaveCsvAsync(dto, tempFilePath);
                     break;
-
                 case "json":
-                    var json = JsonSerializer.Serialize(new
-                    {
-                        Columns = dto.Columns,
-                        Rows = dto.Rows
-                    }, new JsonSerializerOptions { WriteIndented = true });
-                    await File.WriteAllTextAsync(tempFilePath, json);
+                    await SaveJsonAsync(dto, tempFilePath);
                     break;
-
                 case "xml":
-                    var xmlDoc = new XDocument(
-                        new XElement("Root",
-                            dto.Rows.Select(row =>
-                                new XElement("Row",
-                                    dto.Columns.Select((col, i) =>
-                                        new XElement(col, row[i]))))));
-                    await File.WriteAllTextAsync(tempFilePath, xmlDoc.ToString());
+                    await SaveXmlAsync(dto, tempFilePath);
                     break;
-
                 case "xlsx":
                 case "xls":
-                    using (var workbook = new XLWorkbook())
-                    {
-                        var ws = workbook.Worksheets.Add("Slice");
-                        for (int i = 0; i < dto.Columns.Count; i++)
-                            ws.Cell(1, i + 1).Value = dto.Columns[i];
-
-                        for (int r = 0; r < dto.Rows.Count; r++)
-                            for (int c = 0; c < dto.Columns.Count; c++)
-                                ws.Cell(r + 2, c + 1).Value = dto.Rows[r][c];
-
-                        workbook.SaveAs(tempFilePath);
-                    }
+                    SaveExcel(dto, tempFilePath);
                     break;
-
                 default:
                     throw new NotSupportedException($"Extension {dto.Extension} not supported.");
             }
         }
 
+        private async Task SaveCsvAsync(FileFullContentDto dto, string path)
+        {
+            var csv = string.Join('\n', new[] { string.Join(",", dto.Columns) }
+                .Concat(dto.Rows.Select(row => string.Join(",", row))));
+            await File.WriteAllTextAsync(path, csv);
+        }
+
+        private async Task SaveJsonAsync(FileFullContentDto dto, string path)
+        {
+            var rowObjects = dto.Rows.Select(row =>
+                dto.Columns.Select((col, i) => new { col, val = row[i] })
+                           .ToDictionary(x => x.col, x => x.val));
+            var json = JsonSerializer.Serialize(rowObjects, new JsonSerializerOptions { WriteIndented = true });
+            await File.WriteAllTextAsync(path, json);
+        }
+
+        private async Task SaveXmlAsync(FileFullContentDto dto, string path)
+        {
+            var xmlDoc = new XDocument(
+                new XElement("records",
+                    dto.Rows.Select(row =>
+                        new XElement("record",
+                            dto.Columns.Select((col, i) =>
+                                new XElement(col, row[i]))))));
+            await File.WriteAllTextAsync(path, xmlDoc.ToString());
+        }
+
+        private void SaveExcel(FileFullContentDto dto, string path)
+        {
+            using var workbook = new XLWorkbook();
+            var ws = workbook.Worksheets.Add("Slice");
+
+            for (int i = 0; i < dto.Columns.Count; i++)
+                ws.Cell(1, i + 1).Value = dto.Columns[i];
+
+            for (int r = 0; r < dto.Rows.Count; r++)
+                for (int c = 0; c < dto.Columns.Count; c++)
+                    ws.Cell(r + 2, c + 1).Value = dto.Rows[r][c];
+
+            workbook.SaveAs(path);
+        }
+
+        //Прочесть временный файл 
         public async Task<FileFullContentDto> GetSlicedTempContentAsync(string fileName)
         {
             string extension = fileName.Split('.')[1];
             var tempDir = Path.Combine(Path.GetTempPath(), "file_slices");
             var tempFilePath = Path.Combine(tempDir, $"{fileName}_slice.{extension}");
 
-            if (!File.Exists(tempFilePath))
-                throw new FileNotFoundException("Slice file not found", tempFilePath);
-
-            switch (extension.ToLower())
+            return extension.ToLower() switch
             {
-                case "csv":
-                    var lines = await File.ReadAllLinesAsync(tempFilePath);
-                    var columns = lines.First().Split(',').ToList();
-                    var rows = lines.Skip(1).Select(line => line.Split(',').ToList()).ToList();
-                    return new FileFullContentDto
-                    {
-                        FileName = fileName,
-                        Extension = extension,
-                        Columns = columns,
-                        Rows = rows
-                    };
+                "csv" => await ReadCsvSliceAsync(tempFilePath, fileName, extension),
+                "json" => await ReadJsonSliceAsync(tempFilePath, fileName, extension),
+                "xml" => await ReadXmlSliceAsync(tempFilePath, fileName, extension),
+                "xlsx" or "xls" => ReadExcelSlice(tempFilePath, fileName, extension),
+                _ => throw new NotSupportedException($"Extension {extension} not supported.")
+            };
+        }
 
-                case "json":
-                    using (var stream = File.OpenRead(tempFilePath))
-                    {
-                        var doc = await JsonSerializer.DeserializeAsync<JsonElement>(stream);
-                        var cols = doc.GetProperty("Columns").EnumerateArray().Select(c => c.GetString()).ToList();
-                        var rowsJson = doc.GetProperty("Rows").EnumerateArray();
-                        var parsedRows = rowsJson.Select(row => row.EnumerateArray().Select(cell => cell.GetString()).ToList()).ToList();
+        private async Task<FileFullContentDto> ReadCsvSliceAsync(string path, string fileName, string extension)
+        {
+            var lines = await File.ReadAllLinesAsync(path);
+            var columns = lines.First().Split(',').ToList();
+            var rows = lines.Skip(1).Select(line => line.Split(',').ToList()).ToList();
 
-                        return new FileFullContentDto
-                        {
-                            FileName = fileName,
-                            Extension = extension,
-                            Columns = cols,
-                            Rows = parsedRows
-                        };
-                    }
+            return new FileFullContentDto
+            {
+                FileName = fileName,
+                Extension = extension,
+                Columns = columns,
+                Rows = rows
+            };
+        }
 
-                case "xml":
-                    var xdoc = XDocument.Load(tempFilePath);
-                    var firstRow = xdoc.Root.Elements("Row").First();
-                    var colsXml = firstRow.Elements().Select(e => e.Name.LocalName).ToList();
-                    var rowsXml = xdoc.Root.Elements("Row")
-                        .Select(row => colsXml.Select(col => row.Element(col)?.Value ?? "").ToList())
-                        .ToList();
+        private async Task<FileFullContentDto> ReadJsonSliceAsync(string path, string fileName, string extension)
+        {
+            var json = await File.ReadAllTextAsync(path);
+            var rowObjects = JsonSerializer.Deserialize<List<Dictionary<string, string>>>(json);
 
-                    return new FileFullContentDto
-                    {
-                        FileName = fileName,
-                        Extension = extension,
-                        Columns = colsXml,
-                        Rows = rowsXml
-                    };
+            var columns = rowObjects.First().Keys.ToList();
+            var rows = rowObjects.Select(dict => columns.Select(col => dict[col]).ToList()).ToList();
 
-                case "xlsx":
-                case "xls":
-                    using (var workbook = new XLWorkbook(tempFilePath))
-                    {
-                        var ws = workbook.Worksheet(1);
-                        var colCount = ws.Row(1).CellsUsed().Count();
-                        var rowCount = ws.LastRowUsed().RowNumber();
+            return new FileFullContentDto
+            {
+                FileName = fileName,
+                Extension = extension,
+                Columns = columns,
+                Rows = rows
+            };
+        }
 
-                        var colNames = Enumerable.Range(1, colCount).Select(i => ws.Cell(1, i).GetString()).ToList();
-                        var rowData = new List<List<string>>();
-                        for (int i = 2; i <= rowCount; i++)
-                        {
-                            rowData.Add(Enumerable.Range(1, colCount).Select(j => ws.Cell(i, j).GetString()).ToList());
-                        }
+        private async Task<FileFullContentDto> ReadXmlSliceAsync(string path, string fileName, string extension)
+        {
+            var xdoc = await XDocument.LoadAsync(File.OpenRead(path), System.Xml.Linq.LoadOptions.None, CancellationToken.None);
+            var records = xdoc.Root.Elements().ToList();
+            var columns = records.First().Elements().Select(e => e.Name.LocalName).ToList();
+            var rows = records.Select(r => r.Elements().Select(e => e.Value).ToList()).ToList();
 
-                        return new FileFullContentDto
-                        {
-                            FileName = fileName,
-                            Extension = extension,
-                            Columns = colNames,
-                            Rows = rowData
-                        };
-                    }
+            return new FileFullContentDto
+            {
+                FileName = fileName,
+                Extension = extension,
+                Columns = columns,
+                Rows = rows
+            };
+        }
 
-                default:
-                    throw new NotSupportedException($"Extension {extension} not supported.");
-            }
+        private FileFullContentDto ReadExcelSlice(string path, string fileName, string extension)
+        {
+            using var workbook = new XLWorkbook(path);
+            var ws = workbook.Worksheets.First();
+
+            var columns = ws.Row(1).Cells().Select(c => c.GetString()).ToList();
+            var rows = ws.RowsUsed().Skip(1).Select(row =>
+                columns.Select((_, i) => row.Cell(i + 1).GetString()).ToList()).ToList();
+
+            return new FileFullContentDto
+            {
+                FileName = fileName,
+                Extension = extension,
+                Columns = columns,
+                Rows = rows
+            };
         }
 
         public async Task UploadSliceToStorageServiceAsync(string fileName, string jwtToken)
@@ -608,16 +626,8 @@ namespace FileAnalyzerService.Services
             if (sliceFilePath == null)
                 throw new FileNotFoundException("Slice file not found.");
 
-            using var httpClient = new HttpClient();
-
-            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
-
             using var fileStream = File.OpenRead(sliceFilePath);
-            using var content = new MultipartFormDataContent();
-            content.Add(new StreamContent(fileStream), "file", Path.GetFileName(sliceFilePath));
-
-            var response = await httpClient.PostAsync("http://localhost:5002/api/v1/storage/upload", content);
-            response.EnsureSuccessStatusCode();
+            await _storageClient.UploadFileAsync(fileStream, Path.GetFileName(sliceFilePath), jwtToken);
         }
     }
 }

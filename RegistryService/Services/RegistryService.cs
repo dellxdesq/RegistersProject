@@ -6,20 +6,22 @@ using RegistryService.Models;
 using RegistryServiceProject.Models.Dto;
 using RegistryService.Models.Dto;
 using System.Net.Http;
+using RegistryService.Services;
 
 namespace RegistryServiceProject.Services
 {
     public class RegistryService
     {
         private readonly AppDbContext _db;
-        private readonly HttpClient _httpClient;
-        private readonly IConfiguration _config;
+        private readonly IFileAnalyzerClient _fileAnalyzerClient; 
+        //private readonly HttpClient _httpClient;
+        //private readonly IConfiguration _config;
 
-        public RegistryService(AppDbContext db, HttpClient httpClient, IConfiguration config)
+        public RegistryService(AppDbContext db, IFileAnalyzerClient fileAnalyzer /*IConfiguration config*/)
         {
             _db = db;
-            _httpClient = httpClient;
-            _config = config;
+            _fileAnalyzerClient = fileAnalyzer;
+            //_config = config;
         }
 
         public async Task<List<Registry>> GetRegistriesAsync(int? userId)
@@ -151,8 +153,9 @@ namespace RegistryServiceProject.Services
             await _db.SaveChangesAsync(); // надо, чтобы получить registry.Id
 
             //var analyzerUrl = $"{_config["AnalyzerService:BaseUrl"]}/api/v1/file-preview/{request.FileName}";
-            var analyzerUrl = $"http://localhost:5008/api/v1/file-preview/{request.FileName}";
-            var analysis = await _httpClient.GetFromJsonAsync<FileAnalysisDto>(analyzerUrl);
+            //var analyzerUrl = $"http://localhost:5008/api/v1/file-preview/{request.FileName}";
+            //var analysis = await _httpClient.GetFromJsonAsync<FileAnalysisDto>(analyzerUrl);
+            var analysis = await _fileAnalyzerClient.AnalyzeFileAsync(request.FileName);
 
             var meta = new RegistryMeta
             {

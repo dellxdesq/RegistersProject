@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using RegistryService.Models;
 using RegistryService.Models.Dto;
+using RegistryService.Services;
 using RegistryServiceProject.Models.Dto;
 using RegistryServiceProject.Services;
 using System.Security.Claims;
@@ -14,10 +15,12 @@ namespace RegistryServiceProject.Controllers
     public class RegistryController : ControllerBase
     {
         private readonly Services.RegistryService _registryService;
+        private readonly IStorageClient _storageClient;
 
-        public RegistryController(Services.RegistryService registryService)
+        public RegistryController(Services.RegistryService registryService, IStorageClient storage)
         {
             _registryService = registryService ?? throw new ArgumentNullException(nameof(registryService));
+            _storageClient = storage;
         }
 
         //все реестры кроме тех к которым не дали доступ
@@ -170,9 +173,10 @@ namespace RegistryServiceProject.Controllers
             var fileName = registry.Meta.FileName;
 
             // Запросить ссылку у StorageService
-            var httpClient = new HttpClient(); // лучше через IHttpClientFactory
-            var response = await httpClient.GetFromJsonAsync<PresignedUrlResponse>(
-                $"http://localhost:5002/api/v1/storage/download-link/{fileName}");
+            //var httpClient = new HttpClient(); // лучше через IHttpClientFactory
+            //var response = await httpClient.GetFromJsonAsync<PresignedUrlResponse>(
+            //    $"http://localhost:5002/api/v1/storage/download-link/{fileName}");
+            var response = await _storageClient.GetPresignedDownloadUrlAsync(fileName);
 
             if (response == null || string.IsNullOrEmpty(response.Url))
                 return StatusCode(500, "Не удалось получить ссылку на скачивание");
