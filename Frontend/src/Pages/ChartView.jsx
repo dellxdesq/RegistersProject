@@ -34,7 +34,6 @@ export default function ChartViewer() {
                             domain={[Math.min(...yTicks), Math.max(...yTicks)]}
                             tickFormatter={(value) =>
                                 value >= 1_000_000 ? `${(value / 1_000_000).toFixed(1)}M`
-                                    : value >= 1_000 ? `${(value / 1_000).toFixed(1)}K`
                                         : value
                             }
                         />
