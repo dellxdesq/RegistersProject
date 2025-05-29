@@ -1,39 +1,91 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "./styles";
+import { getFullRegistryFile } from "../../Api/Registries/getFullRegistryData";
+import { previewSlice } from "../../Api/Slices/previewSlice";
+import { saveSliceToDB } from "../../Api/Slices/saveSlice";
+import { viewSlice } from "../../Api/Slices/viewSlice";
+import { confirmSlice } from "../../Api/Slices/confirmSlice";
 
-export default function CreateSlice({ isOpen, onClose, headers, fileFormat }) {
+const filterOps = ["=", "!=", ">", "<", ">=", "<="];
+
+export default function CreateSlice({ isOpen, onClose, fileFormat, fileName, registerId }) {
     const [selectedColumns, setSelectedColumns] = useState([]);
-    const [selectedRows, setSelectedRows] = useState("");
-    const [conditions, setConditions] = useState({
-        onlyEvenIDs: false,
-        recentDates: false,
-        typeAOnly: false,
-        nameStartsWith: false
-    });
-
+    const [filters, setFilters] = useState([]);
+    const [columns, setColumns] = useState([]);
+    const [limit, setLimit] = useState(10);
     const [selectedKey, setSelectedKey] = useState("");
     const [dataRows, setDataRows] = useState("");
 
     const isStructuredFormat = ["json", "xml"].includes(fileFormat?.toLowerCase());
+    const token = localStorage.getItem("access_token");
+
+    useEffect(() => {
+        if (isOpen && fileName && token) {
+            getFullRegistryFile(fileName, token)
+                .then((data) => {
+                    setColumns(data.columns || []);
+                    setFilters([{ column: "", op: "=", value: "" }]);
+                })
+                .catch((err) => console.error("Ошибка загрузки колонок:", err));
+        }
+    }, [isOpen, fileName, token]);
 
     if (!isOpen) return null;
 
-    const toggleCondition = (condition) => {
-        setConditions((prev) => ({ ...prev, [condition]: !prev[condition] }));
+    const handleFilterChange = (index, field, value) => {
+        const newFilters = [...filters];
+        newFilters[index][field] = value;
+        setFilters(newFilters);
     };
 
-    const handleCreate = () => {
-        if (isStructuredFormat) {
-            alert(`Срез создан по ключу "${selectedKey}" с данными:\n${dataRows}`);
-        } else {
-            alert("Срез создан");
+    const addFilter = () => {
+        setFilters([...filters, { column: "", op: "=", value: "" }]);
+    };
+
+    const removeFilter = (index) => {
+        const newFilters = filters.filter((_, i) => i !== index);
+        setFilters(newFilters);
+    };
+
+    const handleCreate = async () => {
+        try {
+            const payload = buildSlicePayload();
+            await previewSlice(fileName, payload);
+            const { id } = await saveSliceToDB(registerId, payload);
+            const result = await viewSlice(fileName);
+            await confirmSlice(fileName);
+            alert(`Срез создан (ID: ${id}). Предпросмотр: ${JSON.stringify(result)}`);
+            onClose();
+        } catch (err) {
+            console.error("Ошибка создания среза:", err);
+            alert("Не удалось создать срез");
         }
-        onClose();
     };
 
     const handleColumnChange = (e) => {
-        const selected = Array.from(e.target.selectedOptions, option => option.value);
+        const selected = Array.from(e.target.selectedOptions, (option) => option.value);
         setSelectedColumns(selected);
+    };
+
+    const buildSlicePayload = () => {
+        if (isStructuredFormat) {
+            return {
+                columns: [selectedKey],
+                filters: dataRows
+                    .split("\n")
+                    .map(line => ({ column: selectedKey, op: "=", value: line.trim() }))
+                    .filter(item => item.value),
+                limit: limit || 10
+            };
+        } else {
+            return {
+                columns: selectedColumns,
+                filters: filters
+                    .filter(f => f.column && f.op && f.value)
+                    .map(f => ({ column: f.column, op: f.op, value: f.value })),
+                limit: limit || 10
+            };
+        }
     };
 
     return (
@@ -50,25 +102,55 @@ export default function CreateSlice({ isOpen, onClose, headers, fileFormat }) {
                             onChange={handleColumnChange}
                             style={styles.selectMultiple}
                         >
-                            {headers.map((header, idx) => (
+                            {columns.map((header, idx) => (
                                 <option key={idx} value={header}>{header}</option>
                             ))}
                         </select>
 
-                        <label style={styles.label}>Выбор строк (номера через запятую):</label>
+                        <label style={styles.label}>Фильтры:</label>
+                        {filters.map((filter, idx) => (
+                            <div key={idx} style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
+                                <select
+                                    value={filter.column}
+                                    onChange={(e) => handleFilterChange(idx, "column", e.target.value)}
+                                    style={styles.input}
+                                >
+                                    <option value="">Колонка</option>
+                                    {columns.map((col, i) => (
+                                        <option key={i} value={col}>{col}</option>
+                                    ))}
+                                </select>
+
+                                <select
+                                    value={filter.op}
+                                    onChange={(e) => handleFilterChange(idx, "op", e.target.value)}
+                                    style={styles.input}
+                                >
+                                    {filterOps.map((op, i) => (
+                                        <option key={i} value={op}>{op}</option>
+                                    ))}
+                                </select>
+
+                                <input
+                                    type="text"
+                                    value={filter.value}
+                                    onChange={(e) => handleFilterChange(idx, "value", e.target.value)}
+                                    placeholder="Значение"
+                                    style={styles.input}
+                                />
+
+                                <button onClick={() => removeFilter(idx)} style={styles.closeButton}>✕</button>
+                            </div>
+                        ))}
+                        <button onClick={addFilter} style={styles.createButton}>Добавить фильтр</button>
+
+                        <label style={styles.label}>Лимит строк:</label>
                         <input
-                            type="text"
-                            value={selectedRows}
-                            onChange={(e) => setSelectedRows(e.target.value)}
+                            type="number"
+                            value={limit}
+                            onChange={(e) => setLimit(Number(e.target.value))}
                             style={styles.input}
                         />
-
-                        <div style={styles.conditionsWrapper}>
-                            <label><input type="checkbox" checked={conditions.onlyEvenIDs} onChange={() => toggleCondition("onlyEvenIDs")} /> Только с чётными ID</label>
-                            <label><input type="checkbox" checked={conditions.recentDates} onChange={() => toggleCondition("recentDates")} /> Только с недавними датами</label>
-                            <label><input type="checkbox" checked={conditions.typeAOnly} onChange={() => toggleCondition("typeAOnly")} /> Только тип A</label>
-                            <label><input type="checkbox" checked={conditions.nameStartsWith} onChange={() => toggleCondition("nameStartsWith")} /> Имя начинается с "Д"</label>
-                        </div>
                     </>
                 ) : (
                     <>
@@ -79,7 +161,7 @@ export default function CreateSlice({ isOpen, onClose, headers, fileFormat }) {
                             style={styles.input}
                         >
                             <option value="">-- Выберите ключ --</option>
-                            {headers.map((header, idx) => (
+                            {columns.map((header, idx) => (
                                 <option key={idx} value={header}>{header}</option>
                             ))}
                         </select>
@@ -88,8 +170,16 @@ export default function CreateSlice({ isOpen, onClose, headers, fileFormat }) {
                         <textarea
                             value={dataRows}
                             onChange={(e) => setDataRows(e.target.value)}
-                            placeholder="Введите данные, например JSON/XML строки"
+                            placeholder="Введите строки данных"
                             style={{ ...styles.input, height: "100px", resize: "vertical" }}
+                        />
+
+                        <label style={styles.label}>Лимит строк:</label>
+                        <input
+                            type="number"
+                            value={limit}
+                            onChange={(e) => setLimit(Number(e.target.value))}
+                            style={styles.input}
                         />
                     </>
                 )}
@@ -102,4 +192,3 @@ export default function CreateSlice({ isOpen, onClose, headers, fileFormat }) {
         </div>
     );
 }
-

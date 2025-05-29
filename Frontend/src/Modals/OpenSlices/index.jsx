@@ -1,24 +1,34 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import modalStyles from "./styles.js";
+import { viewSlice } from "../../Api/Slices/viewSlice";
 
-export default function OpenSlices({ isOpen, onClose }) {
+
+export default function OpenSlices({ isOpen, onClose, fileName }) {
     const [searchTerm, setSearchTerm] = useState("");
+    const [slices, setSlices] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
     const navigate = useNavigate();
 
-    const fakeSlices = [
-        { id: 1, name: "Срез 1 (заглушка)" },
-        { id: 2, name: "Срез 2 (заглушка)" },
-        { id: 3, name: "Срез 3 (заглушка)" },
-        { id: 4, name: "Срез 4 (заглушка)" },
-        { id: 11, name: "Срез 5 (заглушка)" },
-        { id: 12, name: "Срез 6 (заглушка)" },
-        { id: 13, name: "Срез 7 (заглушка)" },
-        { id: 33, name: "Срез 8 (заглушка)" },
-    ];
+    useEffect(() => {
+        if (!isOpen || !fileName) return;
 
-    const filteredSlices = fakeSlices.filter(slice =>
-        slice.name.toLowerCase().includes(searchTerm.toLowerCase())
+        setLoading(true);
+        setError(null);
+        const token = localStorage.getItem("access_token");
+
+        getAllSlices(fileName, token)
+            .then((data) => setSlices(data || []))
+            .catch((err) => {
+                console.error("Ошибка получения срезов:", err);
+                setError("Не удалось загрузить срезы");
+            })
+            .finally(() => setLoading(false));
+    }, [isOpen, fileName]);
+
+    const filteredSlices = slices.filter(slice =>
+        slice.name?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const handleOpenSlice = (id) => {
@@ -32,25 +42,33 @@ export default function OpenSlices({ isOpen, onClose }) {
         <div style={modalStyles.overlay}>
             <div style={modalStyles.modal}>
                 <h3>Срезы</h3>
+
                 <input
                     type="text"
                     placeholder="Поиск среза..."
                     value={searchTerm}
-                    onChange={e => setSearchTerm(e.target.value)}
+                    onChange={(e) => setSearchTerm(e.target.value)}
                     style={modalStyles.search}
                 />
-                {filteredSlices.map(slice => (
-                    <div
-                        key={slice.id}
-                        style={modalStyles.listItem}
-                        onClick={() => handleOpenSlice(slice.id)}
-                    >
-                        {slice.name}
-                    </div>
-                ))}
-                {filteredSlices.length === 0 && (
+
+                {loading ? (
+                    <div>Загрузка...</div>
+                ) : error ? (
+                    <div style={{ color: "red" }}>{error}</div>
+                ) : filteredSlices.length > 0 ? (
+                    filteredSlices.map(slice => (
+                        <div
+                            key={slice.id}
+                            style={modalStyles.listItem}
+                            onClick={() => handleOpenSlice(slice.id)}
+                        >
+                            {slice.name || `Срез ${slice.id}`}
+                        </div>
+                    ))
+                ) : (
                     <div style={{ color: "#999" }}>Нет срезов</div>
                 )}
+
                 <button onClick={onClose} style={modalStyles.closeButton}>Закрыть</button>
             </div>
         </div>

@@ -142,7 +142,13 @@ export default function RegistryActions({ registryId, accessLevel, fileName }) {
             </div>
 
             <OpenSlices isOpen={isSlicesOpen} onClose={() => setIsSlicesOpen(false)} />
-            <CreateSliceModal isOpen={isCreateSliceOpen} onClose={() => setIsCreateSliceOpen(false)} headers={dummyHeaders} />
+            <CreateSliceModal
+                isOpen={isCreateSliceOpen}
+                onClose={() => setIsCreateSliceOpen(false)}
+                headers={dummyHeaders}
+                fileName={fileName}
+                registerId={registryId}
+            />
             <ChartModal
                 isOpen={isChartOpen}
                 onClose={() => setIsChartOpen(false)}
