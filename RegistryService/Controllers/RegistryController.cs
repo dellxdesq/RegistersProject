@@ -121,12 +121,15 @@ namespace RegistryServiceProject.Controllers
             if (registry == null)
                 return Forbid(); // доступ есть к системе, но нет к этому реестру
 
+            bool isCreator = registry.CreatedByUserId == userId;
+
             return Ok(new
             {
                 registry.Id,
                 registry.Name,
                 registry.Description,
                 registry.DefaultAccessLevel,
+                YouCreator = isCreator,
                 Meta = registry.Meta == null ? null : new
                 {
                     registry.Meta.FileFormat,
@@ -173,9 +176,6 @@ namespace RegistryServiceProject.Controllers
             var fileName = registry.Meta.FileName;
 
             // Запросить ссылку у StorageService
-            //var httpClient = new HttpClient(); // лучше через IHttpClientFactory
-            //var response = await httpClient.GetFromJsonAsync<PresignedUrlResponse>(
-            //    $"http://localhost:5002/api/v1/storage/download-link/{fileName}");
             var response = await _storageClient.GetPresignedDownloadUrlAsync(fileName);
 
             if (response == null || string.IsNullOrEmpty(response.Url))

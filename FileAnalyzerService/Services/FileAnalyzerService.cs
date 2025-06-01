@@ -12,14 +12,11 @@ namespace FileAnalyzerService.Services
 {
     public class FileAnalyzerService
     {
-
-
-        //private readonly HttpClient _http;
         private readonly IStorageClient _storageClient;
         //private readonly IConfiguration _config;
         private readonly AppDbContext _db;
 
-        public FileAnalyzerService(AppDbContext db, /*HttpClient http,*/ IStorageClient storage/*IConfiguration config*/)
+        public FileAnalyzerService(AppDbContext db, IStorageClient storage)
         {
             _db = db;
             _storageClient = storage; 
@@ -30,12 +27,6 @@ namespace FileAnalyzerService.Services
         public async Task<FileAnalysisDto> AnalyzeAsync(string fileName)
         {
             var ext = Path.GetExtension(fileName).ToLowerInvariant().Trim('.');
-            //var storageUrl = $"http://localhost:5002/api/v1/storage/download-link/{fileName}";
-            //var resp = await _http.GetFromJsonAsync<DownloadUrlDto>(storageUrl);
-            //if (resp?.Url == null)
-            //    throw new Exception("Не удалось получить ссылку на скачивание");
-
-            //var stream = await _http.GetStreamAsync(resp.Url);
             var stream = await _storageClient.GetFileStreamAsync(fileName);
             int rows = ext switch
             {
