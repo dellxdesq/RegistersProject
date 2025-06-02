@@ -89,12 +89,6 @@ namespace FileAnalyzerService.Services
         public async Task<FilePreviewDto> GetPreviewAsync(string fileName)
         {
             var ext = Path.GetExtension(fileName).ToLowerInvariant().Trim('.');
-            //var storageUrl = $"http://localhost:5002/api/v1/storage/download-link/{fileName}";
-            //var resp = await _http.GetFromJsonAsync<DownloadUrlDto>(storageUrl);
-            //if (resp?.Url == null)
-            //    throw new Exception("Не удалось получить ссылку на скачивание");
-
-            //var stream = await _http.GetStreamAsync(resp.Url);
             var stream = await _storageClient.GetFileStreamAsync(fileName);
 
             (List<string> columns, List<List<string>> first, List<List<string>> last) = ext switch
@@ -358,25 +352,6 @@ namespace FileAnalyzerService.Services
             return (columns, allRows);
         }
 
-        //public async Task<FileSliceResult> GetSliceAsync(string fileName, FileSliceRequest request)
-        //{
-        //    var extension = Path.GetExtension(fileName).ToLowerInvariant();
-
-        //    switch (extension)
-        //    {
-        //        case ".csv":
-        //            return await _csvProcessor.ApplySliceAsync(fileName, request);
-        //        case ".xlsx":
-        //        case ".xls":
-        //            return await _excelProcessor.ApplySliceAsync(fileName, request);
-        //        case ".json":
-        //            return await _jsonProcessor.ApplySliceAsync(fileName, request);
-        //        case ".xml":
-        //            return await _xmlProcessor.ApplySliceAsync(fileName, request);
-        //        default:
-        //            throw new NotSupportedException($"Unsupported file format: {extension}");
-        //    }
-        //}
         public async Task<string> ApplySliceAndSaveTempAsync(string fileName, FileSliceRequest request)
         {
             var result = await ApplySliceAsync(fileName, request);
@@ -611,16 +586,6 @@ namespace FileAnalyzerService.Services
         {
             var tempDir = Path.Combine(Path.GetTempPath(), "file_slices");
 
-            //var extensions = new[] { ".csv", ".json", ".xml", ".xlsx", ".xls" };
-            //var sliceFilePath = extensions
-            //    .Select(ext => Path.Combine(tempDir, $"{sliceFileName}_slice{ext}"))
-            //    .FirstOrDefault(File.Exists);
-
-            //if (sliceFilePath == null)
-            //    throw new FileNotFoundException("Slice file not found.");
-
-            //using var fileStream = File.OpenRead(sliceFilePath);
-            //await _storageClient.UploadFileAsync(fileStream, Path.GetFileName(sliceFilePath), jwtToken);
             var tempFilePath = Path.Combine(tempDir, sliceFileName);
 
             if (!File.Exists(tempFilePath))

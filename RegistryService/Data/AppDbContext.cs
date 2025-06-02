@@ -13,7 +13,6 @@ namespace RegistryServiceProject.Data
         public DbSet<RegistryAccessRequest> RegistryAccessRequests { get; set; }
         public DbSet<RegistryMeta> RegistryMetas { get; set; }
         public DbSet<RegistrySlice> RegistrySlices { get; set; }
-        public DbSet<RegistrySliceRequest> RegistrySliceRequests { get; set; }
 
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
@@ -31,7 +30,8 @@ namespace RegistryServiceProject.Data
             modelBuilder.Entity<Registry>()
                 .HasOne(r => r.Meta)
                 .WithOne(m => m.Registry)
-                .HasForeignKey<RegistryMeta>(m => m.RegistryId);
+                .HasForeignKey<RegistryMeta>(m => m.RegistryId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<RegistryAccessRequest>()
                 .HasOne(r => r.Registry)
@@ -39,17 +39,34 @@ namespace RegistryServiceProject.Data
                 .HasForeignKey(r => r.RegistryId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<RegistryAccessRequest>()
-                .HasOne(r => r.User)
-                .WithMany()
-                .HasForeignKey(r => r.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            //Связь срезов и реестров
-            modelBuilder.Entity<RegistrySlice>()
-                .HasOne<Registry>()
-                .WithMany()
+            modelBuilder.Entity<Registry>()
+                .HasMany(r => r.Slices)
+                .WithOne()
                 .HasForeignKey(s => s.RegistryId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Registry>()
+                .HasMany(r => r.Accesses)
+                .WithOne(ua => ua.Registry)
+                .HasForeignKey(ua => ua.RegistryId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.Registries)
+                .WithOne()
+                .HasForeignKey(r => r.CreatedByUserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.Accesses)
+                .WithOne(ua => ua.User)
+                .HasForeignKey(ua => ua.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.AccessRequests)
+                .WithOne(ar => ar.User)
+                .HasForeignKey(ar => ar.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

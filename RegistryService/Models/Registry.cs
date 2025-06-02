@@ -11,5 +11,7 @@ namespace RegistryService.Models
         public RegistryMeta? Meta { get; set; }
         public AccessLevel DefaultAccessLevel { get; set; }
         public int CreatedByUserId { get; set; }
+        public List<RegistrySlice> Slices { get; set; } = new();
+        public List<UserRegistryAccess> Accesses { get; set; } = new();
     }
 }

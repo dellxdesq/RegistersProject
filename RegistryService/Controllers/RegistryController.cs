@@ -268,7 +268,7 @@ namespace RegistryServiceProject.Controllers
         [HttpDelete("access-requests/{id}")]
         public async Task<IActionResult> DeleteAccessRequest(int id)
         {
-            GetUserId();
+            int user_id = GetUserId();
             var deleted = await _registryService.DeleteAccessRequestAsync(id);
 
             if (!deleted)

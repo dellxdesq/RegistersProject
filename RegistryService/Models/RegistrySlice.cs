@@ -7,5 +7,6 @@
         public string Name { get; set; } = null!;
         public string FileName { get; set; } = null!;
         public string SliceDefinitionJson { get; set; } = null!; // сериализованный FileSliceRequest
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }
