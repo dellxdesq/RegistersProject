@@ -278,7 +278,7 @@ namespace RegistryServiceProject.Controllers
         }
 
         [Authorize]
-        [HttpPost("{registryId}/slice/save")]
+        [HttpPost("{registryId}/slice/add")]
         public async Task<IActionResult> SaveSlice(int registryId, [FromBody] SaveSliceRequestDto dto)
         {
             var entity = new RegistrySlice
@@ -292,6 +292,23 @@ namespace RegistryServiceProject.Controllers
             await _registryService.SaveSliceAsync(entity);
 
             return Ok(entity.Id);
+        }
+
+        [Authorize]
+        [HttpGet("{registryId}/slices")]
+        public async Task<IActionResult> GetSlices(int registryId)
+        {
+            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(userIdStr, out var userId))
+                return Unauthorized();
+
+            
+            //var registry = await _registryService.GetRegistryWithMetaIfUserHasAccessAsync(registryId, userId);
+            //if (registry == null)
+            //    return Forbid();
+
+            var slices = await _registryService.GetSlicesByRegistryIdAsync(registryId);
+            return Ok(slices);
         }
 
     }
