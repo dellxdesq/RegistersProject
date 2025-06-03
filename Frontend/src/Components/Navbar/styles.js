@@ -16,6 +16,11 @@ const styles = {
         cursor: "pointer",
         marginLeft: "10px",
     },
+    welcomeText: {
+        color: "#fff",
+        fontSize: "16px",
+        marginLeft: "10px",
+    },
     leftGroup: {
         display: "flex",
         alignItems: "center",

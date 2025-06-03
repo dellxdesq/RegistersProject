@@ -15,7 +15,8 @@ const styles = {
         fontWeight: "bold",
         marginTop: "1px",
         marginBottom: "20px",
-        textAlign: "center",
+        textAlign: "left",
+        marginLeft: "16px",
     },
     content: {
         display: "flex",

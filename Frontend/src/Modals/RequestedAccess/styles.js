@@ -75,6 +75,7 @@ const styles = {
         border: 'none',
         borderRadius: '6px',
         cursor: 'pointer',
+        marginTop: '10px',
     },
     buttons: {
         display: 'flex',

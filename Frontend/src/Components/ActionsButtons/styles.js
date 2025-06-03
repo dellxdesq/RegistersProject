@@ -22,10 +22,9 @@ const styles = {
     },
     buttonGroup: {
         display: "flex",
-        justifyContent: "space-between",
-        marginTop: "-15px",
+        justifyContent: "center",
         gap: "40px",
-        
+        marginTop: "-3px",
     },
 
     disabledButton: {

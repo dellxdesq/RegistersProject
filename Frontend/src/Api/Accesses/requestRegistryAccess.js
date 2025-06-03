@@ -1,4 +1,6 @@
 import { authFetch } from "../authFetch";
+import {ToastProvider} from "../../Context/ToastContext";
+
 export async function requestRegistryAccess(registryId, message = "Дайте доступ") {
     const token = localStorage.getItem("token");
     if (!token) {
