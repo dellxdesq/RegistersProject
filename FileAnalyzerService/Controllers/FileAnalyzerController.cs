@@ -50,26 +50,26 @@ namespace FileAnalyzerService.Controllers
         [HttpPost("{fileName}/slice")]
         public async Task<IActionResult> Slice(string fileName, [FromBody] FileSliceRequest request)
         {
-            await _fileAnalyzerService.ApplySliceAndSaveTempAsync(fileName, request);
-            return Ok();
+            string tempFileName = await _fileAnalyzerService.ApplySliceAndSaveTempAsync(fileName, request);
+            return Ok(new { sliceFileName = tempFileName });
         }
 
-        [HttpGet("{fileName}/slice/view")]
-        public async Task<IActionResult> ViewSlice(string fileName)
+        [HttpGet("{sliceFileName}/slice/view")]
+        public async Task<IActionResult> ViewSlice(string sliceFileName)
         {
-            var result = await _fileAnalyzerService.GetSlicedTempContentAsync(fileName);
+            var result = await _fileAnalyzerService.GetSlicedTempContentAsync(sliceFileName);
             return Ok(result);
         }
 
-        [HttpPost("{fileName}/slice/confirm")]
-        public async Task<IActionResult> ConfirmSlice(string fileName)
+        [HttpPost("{sliceFileName}/slice/confirm")]
+        public async Task<IActionResult> ConfirmSlice(string sliceFileName)
         {
             var token = HttpContext.Request.Headers["Authorization"].ToString();
             if (token.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
             {
                 token = token.Substring("Bearer ".Length).Trim();
             }
-            await _fileAnalyzerService.UploadSliceToStorageServiceAsync(fileName, token);
+            await _fileAnalyzerService.UploadSliceToStorageServiceAsync(sliceFileName, token);
             return Ok();
         }
     }
