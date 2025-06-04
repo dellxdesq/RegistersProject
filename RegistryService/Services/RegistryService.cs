@@ -24,6 +24,36 @@ namespace RegistryServiceProject.Services
             //_config = config;
         }
 
+        //public async Task<List<Registry>> GetRegistriesAsync(int? userId)
+        //{
+        //    var registriesQuery = _db.Registries.AsQueryable();
+
+        //    if (userId == null)
+        //    {
+        //        // Гость: только публичные и по запросу
+        //        registriesQuery = registriesQuery
+        //            .Where(r => r.DefaultAccessLevel == AccessLevel.Public ||
+        //                        r.DefaultAccessLevel == AccessLevel.Requestable);
+        //    }
+        //    else
+        //    {
+        //        // Авторизованный: 1 и 2 уровень + 3 если есть доступ
+        //        var allowedRegistryIds = await _db.UserRegistryAccesses
+        //            .Where(a => a.UserId == userId && a.IsApproved)
+        //            .Select(a => a.RegistryId)
+        //            .ToListAsync();
+
+        //        registriesQuery = registriesQuery
+        //            .Where(r =>
+        //                r.DefaultAccessLevel == AccessLevel.Public ||
+        //                r.DefaultAccessLevel == AccessLevel.Requestable ||
+        //                (r.DefaultAccessLevel == AccessLevel.InternalOrganization &&
+        //                 allowedRegistryIds.Contains(r.Id)));
+        //    }
+
+        //    return await registriesQuery.ToListAsync();
+        //}
+
         public async Task<List<Registry>> GetRegistriesAsync(int? userId)
         {
             var registriesQuery = _db.Registries.AsQueryable();
@@ -51,8 +81,36 @@ namespace RegistryServiceProject.Services
                          allowedRegistryIds.Contains(r.Id)));
             }
 
-            return await registriesQuery.ToListAsync();
+            // Группирую по OriginalRegistryId (или по Id, если OriginalRegistryId = null)
+            // и беру максимальный Id — это и будет последняя версия
+            var lastVersionIds = await _db.Registries
+                .GroupBy(r => r.OriginalRegistryId ?? r.Id)
+                .Select(g => g.OrderByDescending(r => r.Id).First().Id)
+                .ToListAsync();
+
+            registriesQuery = registriesQuery.Where(r => lastVersionIds.Contains(r.Id));
+
+            return await registriesQuery
+                .Include(r => r.Meta)
+                .ToListAsync();
         }
+
+        //список версий реестра
+        public async Task<List<Registry>> GetRegistryVersionsAsync(int registryId)
+        {
+            var registry = await _db.Registries.FindAsync(registryId);
+            if (registry == null)
+                throw new Exception("Реестр не найден");
+
+            var originalId = registry.OriginalRegistryId ?? registry.Id;
+
+            return await _db.Registries
+                .Where(r => r.OriginalRegistryId == originalId || r.Id == originalId)
+                .Include(r => r.Meta)
+                .OrderByDescending(r => r.CreatedAt)
+                .ToListAsync();
+        }
+
 
         public async Task<List<Registry>> GetRegistriesCreatedByUserAsync(int userId)
         {
@@ -152,9 +210,6 @@ namespace RegistryServiceProject.Services
             _db.Registries.Add(registry);
             await _db.SaveChangesAsync(); // надо, чтобы получить registry.Id
 
-            //var analyzerUrl = $"{_config["AnalyzerService:BaseUrl"]}/api/v1/file-preview/{request.FileName}";
-            //var analyzerUrl = $"http://localhost:5008/api/v1/file-preview/{request.FileName}";
-            //var analysis = await _httpClient.GetFromJsonAsync<FileAnalysisDto>(analyzerUrl);
             var analysis = await _fileAnalyzerClient.AnalyzeFileAsync(request.FileName);
 
             var meta = new RegistryMeta
@@ -204,6 +259,49 @@ namespace RegistryServiceProject.Services
             }
 
             return registry.Id;
+        }
+
+        //добавление новой версии реестру
+        public async Task<int> CreateNewVersionAsync(int registryId, CreateRegistryVersionRequest request, int userId)
+        {
+            var original = await _db.Registries
+                .Include(r => r.Meta)
+                .FirstOrDefaultAsync(r => r.Id == registryId);
+
+            if (original == null)
+                throw new Exception("Реестр не найден");
+
+            var originalId = original.OriginalRegistryId ?? original.Id;
+
+            var newVersion = new Registry
+            {
+                Name = original.Name,
+                OriginalRegistryId = originalId,
+                Description = request.Description,
+                CreatedAt = DateTime.UtcNow,
+                CreatedByUserId = userId,
+                DefaultAccessLevel = original.DefaultAccessLevel
+            };
+
+            _db.Registries.Add(newVersion);
+            await _db.SaveChangesAsync(); // нужен Id для метаданных
+
+            // Анализ файла через FileAnalyzer
+            var analysis = await _fileAnalyzerClient.AnalyzeFileAsync(request.FileName);
+
+            var meta = new RegistryMeta
+            {
+                RegistryId = newVersion.Id,
+                FileFormat = analysis.Extension,
+                FileName = request.FileName,
+                Organization = original.Meta?.Organization ?? string.Empty, // сохраняю организацию из оригинала
+                RowsCount = analysis.RowsCount
+            };
+
+            _db.RegistryMetas.Add(meta);
+            await _db.SaveChangesAsync();
+
+            return newVersion.Id;
         }
 
         //Выдача доступа к реестру по узернейму

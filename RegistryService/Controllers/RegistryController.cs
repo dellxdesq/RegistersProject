@@ -62,6 +62,25 @@ namespace RegistryServiceProject.Controllers
             return Ok(new { RegistryId = registryId });
         }
 
+        //Добавление новой версии реестра
+        [Authorize]
+        [HttpPost("{registryId}/new-version")]
+        public async Task<IActionResult> CreateNewVersion(int registryId, [FromBody] CreateRegistryVersionRequest request)
+        {
+            var userId = GetUserId(); // Получить из токена
+            var newId = await _registryService.CreateNewVersionAsync(registryId, request, userId);
+            return Ok(new { NewVersionId = newId });
+        }
+
+        //история версий
+        [Authorize]
+        [HttpGet("{registryId}/versions")]
+        public async Task<IActionResult> GetVersions(int registryId)
+        {
+            var versions = await _registryService.GetRegistryVersionsAsync(registryId);
+            return Ok(versions);
+        }
+
         //получить список реестров 2-3 уровня доступа созданных текущим пользователем 
         [Authorize]
         [HttpGet("list/uploaded/acces-level/2-3")]
