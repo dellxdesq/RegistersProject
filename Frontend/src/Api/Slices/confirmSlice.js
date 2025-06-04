@@ -8,7 +8,7 @@ export async function confirmSlice(filename) {
             },
         });
 
-        if (!response.ok) throw new Error("Ошибка при подтверждении среза");
+        if (!response.ok) throw new Error("РћС€РёР±РєР° РїСЂРё РїРѕРґС‚РІРµСЂР¶РґРµРЅРёРё СЃСЂРµР·Р°");
 
         return { success: true };
     } catch (error) {

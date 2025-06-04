@@ -8,12 +8,12 @@ export async function getSlicesByRegistry(registryId, token) {
         });
 
         if (!response.ok) {
-            throw new Error(`Ошибка ${response.status}`);
+            throw new Error(`РћС€РёР±РєР° ${response.status}`);
         }
 
         return await response.json();
     } catch (error) {
-        console.error("Ошибка при получении срезов по реестру:", error);
+        console.error("РћС€РёР±РєР° РїСЂРё РїРѕР»СѓС‡РµРЅРёРё СЃСЂРµР·РѕРІ РїРѕ СЂРµРµСЃС‚СЂСѓ:", error);
         throw error;
     }
 }

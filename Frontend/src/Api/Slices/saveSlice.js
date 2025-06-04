@@ -9,7 +9,7 @@ export async function saveSliceToDB(registerId, sliceData) {
             body: JSON.stringify(sliceData)
         });
 
-        if (!response.ok) throw new Error("Ошибка при сохранении среза");
+        if (!response.ok) throw new Error("РћС€РёР±РєР° РїСЂРё СЃРѕС…СЂР°РЅРµРЅРёРё СЃСЂРµР·Р°");
 
         return await response.json();
     } catch (error) {

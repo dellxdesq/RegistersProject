@@ -144,7 +144,11 @@ export default function RegistryActions({ registryId, accessLevel, fileName }) {
                 </div>
             </div>
 
-            <OpenSlices isOpen={isSlicesOpen} onClose={() => setIsSlicesOpen(false)} />
+            <OpenSlices
+                isOpen={isSlicesOpen}
+                onClose={() => setIsSlicesOpen(false)}
+                registryId={registryId}
+            />
             <CreateSliceModal
                 isOpen={isCreateSliceOpen}
                 onClose={() => setIsCreateSliceOpen(false)}
