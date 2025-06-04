@@ -3,7 +3,8 @@ export async function saveSliceToDB(registerId, sliceData) {
         const token = localStorage.getItem("access_token")
         const response = await fetch(`https://localhost:8081/api/v1/registries/${registerId}/slice/add`, {
             method: "POST",
-                headers: {
+            headers: {
+                    "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`
                 },
             body: JSON.stringify(sliceData)
