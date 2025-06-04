@@ -50,17 +50,37 @@ export default function CreateSlice({ isOpen, onClose, fileFormat, fileName, reg
     const handleCreate = async () => {
         try {
             const payload = buildSlicePayload();
-            await previewSlice(fileName, payload);
-            const { id } = await saveSliceToDB(registerId, payload);
-            const result = await viewSlice(fileName);
-            await confirmSlice(fileName);
-            alert(`Срез создан (ID: ${id}). Предпросмотр: ${JSON.stringify(result)}`);
+            
+            const previewResponse = await previewSlice(fileName, payload);
+            const sliceFileName = previewResponse.sliceFileName;
+
+            if (!sliceFileName) throw new Error("sliceFileName не получен");
+            
+            const saveResponse = await saveSliceToDB(registerId, {
+                name: "Срез", 
+                fileName: sliceFileName,
+                request: {
+                    Columns: payload.columns,
+                    filters: payload.filters,
+                    limit: payload.limit
+                }
+            });
+
+            const sliceId = saveResponse;
+            
+            const result = await viewSlice(sliceFileName);
+            
+            await confirmSlice(sliceFileName);
+
+            alert(`Срез создан (ID: ${sliceId}). Предпросмотр: ${JSON.stringify(result)}`);
             onClose();
+
         } catch (err) {
             console.error("Ошибка создания среза:", err);
             alert("Не удалось создать срез");
         }
     };
+
 
     const handleColumnChange = (e) => {
         const selected = Array.from(e.target.selectedOptions, (option) => option.value);
