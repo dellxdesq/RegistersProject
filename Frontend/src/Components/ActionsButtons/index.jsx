@@ -11,6 +11,7 @@ import { getRegistryUsernames } from "../../Api/Registries/getRegistryUsers";
 import { FaDownload, FaChartBar, FaSlidersH, FaEye, FaLock } from "react-icons/fa";
 import { parseJwt } from "../../Utils/parseJwt";
 import { getFullRegistryFile } from "../../Api/Registries/getFullRegistryData";
+import { useToast } from "../../Context/ToastContext";
 
 export default function RegistryActions({ registryId, accessLevel, fileName }) {
     const [hovered, setHovered] = useState(null);
@@ -20,7 +21,7 @@ export default function RegistryActions({ registryId, accessLevel, fileName }) {
     const [requestId, setRequestId] = useState(null);
     const [chartData, setChartData] = useState(null);
     const [isAllowed, setIsAllowed] = useState(false);
-
+    const { showToast } = useToast();
     const actions = [
         { text: "Запросить доступ", icon: <FaLock /> },
         { text: "Скачать", icon: <FaDownload /> },
@@ -64,12 +65,13 @@ export default function RegistryActions({ registryId, accessLevel, fileName }) {
         if (!requestId) return;
         const result = await deleteAccessRequest(requestId);
         if (result.success) {
-            alert("Запрос удалён");
+            showToast("Запрос удалён");
             setRequestId(null);
         } else {
-            alert("Ошибка: " + result.error);
+            showToast("Ошибка: " + result.error);
         }
     };
+
 
     const handleClick = async (text) => {
         if (text === "Просмотр срезов") {
@@ -83,22 +85,23 @@ export default function RegistryActions({ registryId, accessLevel, fileName }) {
                 setChartData(fullData);
                 setIsChartOpen(true);
             } catch (err) {
-                alert("Ошибка загрузки данных: " + err.message);
+                showToast("Ошибка загрузки данных: " + err.message);
             }
         } else if (text === "Скачать") {
             const result = await downloadRegistry(registryId);
             if (!result.success) {
-                alert("Ошибка при скачивании: " + result.error);
+                showToast("Ошибка при скачивании: " + result.error);
             }
         } else if (text === "Запросить доступ") {
             try {
                 const responseText = await requestRegistryAccess(registryId, "Дайте доступ");
-                alert(responseText);
+                showToast(responseText);
             } catch (err) {
-                alert("Ошибка: " + err.message);
+                showToast("Ошибка: " + err.message);
             }
         }
     };
+
 
     return (
         <>
@@ -141,7 +144,11 @@ export default function RegistryActions({ registryId, accessLevel, fileName }) {
                 </div>
             </div>
 
-            <OpenSlices isOpen={isSlicesOpen} onClose={() => setIsSlicesOpen(false)} />
+            <OpenSlices
+                isOpen={isSlicesOpen}
+                onClose={() => setIsSlicesOpen(false)}
+                registryId={registryId}
+            />
             <CreateSliceModal
                 isOpen={isCreateSliceOpen}
                 onClose={() => setIsCreateSliceOpen(false)}

@@ -396,6 +396,12 @@ namespace RegistryServiceProject.Services
             await _db.SaveChangesAsync();
         }
 
+        public async Task<List<RegistrySlice>> GetSlicesByRegistryIdAsync(int registryId)
+        {
+            return await _db.RegistrySlices
+                .Where(s => s.RegistryId == registryId)
+                .ToListAsync();
+        }
 
     }
 }

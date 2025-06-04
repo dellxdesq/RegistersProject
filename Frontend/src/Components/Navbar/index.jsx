@@ -1,21 +1,10 @@
 import styles from "../Navbar/styles";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import {useAuth} from "../../Context/AuthContext";
+import { useAuth } from "../../Context/AuthContext";
 
 export default function Index() {
     const navigate = useNavigate();
     const { user } = useAuth();
-    const [username, setUsername] = useState(null);
-
-    useEffect(() => {
-        const storedUsername = localStorage.getItem("username");
-        const token = localStorage.getItem("token");
-
-        if (storedUsername && token) {
-            setUsername(storedUsername);
-        }
-    }, []);
 
     return (
         <div style={styles.navbar}>
@@ -26,7 +15,9 @@ export default function Index() {
             </div>
             <div style={styles.rightGroup}>
                 {user ? (
-                    <div style={styles.navButton}>Добро пожаловать, {user.username}</div>
+                    <div style={styles.welcomeText}>
+                        Добро пожаловать, {user.firstName} {user.lastName}
+                    </div>
                 ) : (
                     <button onClick={() => navigate("/auth")} style={styles.navButton}>
                         Войти
